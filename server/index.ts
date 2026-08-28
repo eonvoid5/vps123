@@ -11,7 +11,7 @@ import { javaInfo, nodeStats, nextFreePort } from "./node.js";
 import { pteroRouter } from "./ptero-features.js";
 
 const app = express();
-const PORT = Number(process.env.PORT || 6768);
+const PORT = Number(process.env.PORT || 6968);
 const root = process.cwd();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "25mb" }));
@@ -211,7 +211,7 @@ app.post("/api/servers/:id/backup", requireAuth, async (req, res) => {
 
 app.get("/api/settings", requireAuth, (_q, res) => res.json(db().settings));
 app.put("/api/settings", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); d.settings = { ...d.settings, ...req.body }; saveDB(d); res.json(d.settings); });
-app.get("/api/users", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); const servers = records(); res.json(d.users.map(publicUser).map(u => ({ ...u, servers: servers.filter(s => (s as any).ownerId === u.id).map(s => ({ id:s.id, name:s.name, status:runtime(s.id)?"online":s.status, memory:s.memory, port:s.port, version:s.version })) })) ); });
+app.get("/api/users", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); const servers = records(); res.json(d.users.map(publicUser).map(u => ({ ...u, servers: servers.filter(s => (s as any).ownerId === u.id).map(s => ({ id:s.id, name:s.name, status:runtime(s.id)?"online":s.status, memory:s.memory, port:s.port, version:s.version })) }))); });
 app.patch("/api/users/:id/role", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); const u = d.users.find(x => x.id === req.params.id); if (!u) return res.status(404).json({ error: "User not found" }); if (u.id === req.user.id) return res.status(400).json({ error: "You cannot change your own role" }); const role = String(req.body.role || "user"); if (role !== "user" && role !== "admin") return res.status(400).json({ error: "Invalid role" }); u.role = role as User["role"]; saveDB(d); res.json(publicUser(u)); });
 
 app.use("/api/ptero", requireAuth, pteroRouter);
