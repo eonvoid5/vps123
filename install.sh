@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 APP_DIR="/opt/void-host"; PORT="${PORT:-6767}"; REPO="https://github.com/eonvoid5/vps123.git"; LOG="/var/log/void-host-panel.log"; SERVICE="void-host-panel"
 if [ "$(id -u)" -ne 0 ]; then echo "ERROR: Run as root."; exit 1; fi
-echo "[1/8] Installing OS packages..."; apt-get update -y; apt-get install -y git curl ca-certificates openjdk-21-jre
+echo "[1/8] Installing OS packages..."; apt-get update -y; apt-get install -y git curl ca-certificates openssl openjdk-21-jre
 command -v java >/dev/null || { echo "Java installation failed"; exit 1; }; java -version
 echo "[2/8] Installing Node.js 22 if needed..."; if ! command -v node >/dev/null 2>&1; then curl -fsSL https://deb.nodesource.com/setup_22.x | bash -; apt-get install -y nodejs; fi
 node -v; npm -v
@@ -12,7 +12,6 @@ echo "[5/8] Building production panel..."; npm run build
 if [ ! -f dist/server.cjs ]; then echo "ERROR: dist/server.cjs was not created"; find dist -maxdepth 2 -type f -print; exit 1; fi
 echo "[6/8] Creating persistent data directories..."; mkdir -p "$APP_DIR/data/servers" "$APP_DIR/data/backups"; touch "$LOG"; chmod 755 "$APP_DIR"
 SECRET_FILE="$APP_DIR/.env"; if [ ! -f "$SECRET_FILE" ]; then printf 'JWT_SECRET=%s\nPORT=%s\n' "$(openssl rand -hex 32)" "$PORT" > "$SECRET_FILE"; chmod 600 "$SECRET_FILE"; fi
-apt-get install -y openssl >/dev/null
 echo "[7/8] Installing systemd service..."; cat > "/etc/systemd/system/$SERVICE.service" <<EOF
 [Unit]
 Description=VOID HOST Minecraft Hosting Panel
