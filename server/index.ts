@@ -11,7 +11,7 @@ import { javaInfo, nodeStats, nextFreePort } from "./node.js";
 import { pteroRouter } from "./ptero-features.js";
 
 const app = express();
-const PORT = Number(process.env.PORT || 6767);
+const PORT = Number(process.env.PORT || 6768);
 const root = process.cwd();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "25mb" }));
