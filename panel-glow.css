@@ -1,0 +1,23 @@
+/* VOID HOST panel-only neon treatment. Auth/login/register intentionally excluded. */
+.app{--neon:rgba(34,255,132,.72);--neon-soft:rgba(34,255,132,.22)}
+.app .glass{border-color:rgba(73,255,155,.34);box-shadow:0 0 0 1px rgba(45,255,140,.04),0 18px 60px rgba(0,0,0,.48),0 0 28px rgba(22,240,120,.10),inset 0 1px 0 rgba(255,255,255,.09),inset 0 0 32px rgba(20,220,110,.035)}
+.app .glass:hover{border-color:rgba(82,255,164,.5);box-shadow:0 0 0 1px rgba(45,255,140,.06),0 20px 68px rgba(0,0,0,.5),0 0 34px rgba(22,240,120,.15),inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 40px rgba(20,220,110,.05)}
+.app button{transition:transform .18s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease,filter .22s ease}
+.app .sidebar nav button,.app .top-actions button,.app .topbar>button,.app .panel-title button,.app .table-head,.app .filebar button,.app .actions button,.app .server-tabs button,.app .back{box-shadow:0 0 14px rgba(34,255,132,.06),inset 0 0 12px rgba(34,255,132,.025)}
+.app .sidebar nav button:hover,.app .sidebar nav button.active,.app .top-actions button:hover,.app .topbar>button:hover,.app .panel-title button:hover,.app .filebar button:hover,.app .actions button:hover,.app .server-tabs button:hover,.app .back:hover{border-color:rgba(72,255,153,.62);box-shadow:0 0 10px rgba(34,255,132,.18),0 0 28px rgba(34,255,132,.12),inset 0 0 18px rgba(34,255,132,.06)}
+.app .primary{box-shadow:0 0 10px rgba(38,255,139,.35),0 0 28px rgba(38,255,139,.22),0 12px 35px rgba(19,222,113,.24),inset 0 1px 0 rgba(255,255,255,.18)!important}
+.app .primary:hover{filter:brightness(1.12);box-shadow:0 0 14px rgba(38,255,139,.55),0 0 42px rgba(38,255,139,.3),0 16px 42px rgba(19,222,113,.3),inset 0 1px 0 rgba(255,255,255,.22)!important}
+.app .primary:active{box-shadow:0 0 8px rgba(38,255,139,.3),0 0 18px rgba(38,255,139,.18),inset 0 0 20px rgba(0,80,40,.2)!important}
+.app .card,.app .server-card,.app .table-row,.app .userbox{border-color:rgba(73,255,155,.28)}
+.app .card:hover,.app .server-card:hover,.app .table-row:hover{box-shadow:0 0 22px rgba(34,255,132,.12),inset 0 0 24px rgba(34,255,132,.035)}
+.app .card-icon,.app .server-icon,.app .server-mini{box-shadow:0 0 14px rgba(34,255,132,.15),inset 0 0 12px rgba(34,255,132,.06)}
+.app .live-dot,.app .online-dot{box-shadow:0 0 7px #22f487,0 0 18px rgba(34,244,135,.65)}
+.app .eyebrow{box-shadow:0 0 16px rgba(45,255,143,.12),inset 0 0 12px rgba(45,255,143,.04)}
+.app input:focus,.app select:focus,.app textarea:focus{border-color:rgba(49,244,140,.75);box-shadow:0 0 0 3px rgba(40,240,136,.08),0 0 22px rgba(40,240,136,.16)!important}
+/* User-management surfaces: stronger strokes and readable glass without touching auth. */
+.app [class*="user"]:not(.userbox){border-color:rgba(73,255,155,.30)}
+.app [class*="user"]:not(.userbox):hover{box-shadow:0 0 24px rgba(34,255,132,.12),inset 0 0 20px rgba(34,255,132,.04)}
+@keyframes voidPulse{0%,100%{box-shadow:0 0 10px rgba(34,255,132,.18),0 0 22px rgba(34,255,132,.08)}50%{box-shadow:0 0 16px rgba(34,255,132,.34),0 0 38px rgba(34,255,132,.14)}}
+.app .active,.app .primary{animation:voidPulse 3s ease-in-out infinite}
+/* Never apply these panel animations to authentication pages. */
+.auth,.auth *{animation-name:none}
