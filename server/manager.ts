@@ -45,7 +45,7 @@ async function paperJson(url: string) {
   try { return JSON.parse(text); } catch { throw new Error("PaperMC returned invalid JSON"); }
 }
 
-async function paperGraphql<T>(query: string): Promise<T> {
+async function paperGraphql(query: string): Promise<any> {
   const response = await fetch(PAPER_GRAPHQL, {
     method: "POST",
     headers: { "User-Agent": USER_AGENT, Accept: "application/json", "Content-Type": "application/json" },
@@ -55,7 +55,7 @@ async function paperGraphql<T>(query: string): Promise<T> {
   if (!response.ok) throw new Error(`PaperMC GraphQL ${response.status}: ${text.slice(0, 180)}`);
   const data = JSON.parse(text);
   if (data.errors?.length) throw new Error(`PaperMC GraphQL: ${data.errors[0]?.message || "query failed"}`);
-  return data.data as T;
+  return data.data;
 }
 
 function sortVersions(versions: string[]) {
@@ -75,12 +75,8 @@ export async function paperVersions() {
     const versions = Object.values(data.versions ?? {}).flat().filter(v => /^\d+\.\d+(?:\.\d+)?$/.test(v));
     return sortVersions(versions);
   } catch (restError) {
-    const data = await paperGraphql<{project?: {versions?: {edges?: Array<{node?: {key?: string}}>}}}>(
-      `query { project(key: "paper") { versions(first: 100) { edges { node { key } } } } }`
-    );
-    const versions = (data.project?.versions?.edges ?? [])
-      .map(x => x.node?.key)
-      .filter((v): v is string => !!v && /^\d+\.\d+(?:\.\d+)?$/.test(v));
+    const data = await paperGraphql(`query { project(key: "paper") { versions(first: 100) { edges { node { key } } } } }`);
+    const versions = (data.project?.versions?.edges ?? []).map((x: any) => x.node?.key).filter((v: any): v is string => !!v && /^\d+\.\d+(?:\.\d+)?$/.test(v));
     if (!versions.length) throw restError;
     return sortVersions(versions);
   }
@@ -91,31 +87,21 @@ export async function installPaper(id: string, version: string, port?: number) {
   fs.mkdirSync(dir, { recursive: true });
 
   let stable: { id: number; channel: string; downloads?: { "server:default"?: { name: string; url: string } } } | undefined;
-
   try {
-    const builds = await paperJson(`${PAPER_API}/projects/paper/versions/${encodeURIComponent(version)}/builds`) as Array<{
-      id: number; channel: string; downloads?: { "server:default"?: { name: string; url: string } };
-    }>;
+    const builds = await paperJson(`${PAPER_API}/projects/paper/versions/${encodeURIComponent(version)}/builds`) as Array<{ id: number; channel: string; downloads?: { "server:default"?: { name: string; url: string } } }>;
     stable = builds.filter(b => b.channel === "STABLE" && b.downloads?.["server:default"]?.url).sort((a, b) => b.id - a.id)[0];
   } catch {
-    const data = await paperGraphql<{project?: {version?: {builds?: {edges?: Array<{node?: {
-      number?: number; channel?: string; download?: { name?: string; url?: string };
-    }}>}}}}}>(
-      `query { project(key: "paper") { version(key: "${version.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}") { builds(first: 50, orderBy: {direction: DESC}) { edges { node { number channel download(key: "server:default") { name url } } } } } } }`
-    );
-    const nodes = data.project?.version?.builds?.edges?.map(x => x.node).filter(Boolean) ?? [];
-    const node = nodes.find(x => x?.channel === "STABLE" && x?.download?.url);
-    if (node?.number && node.download?.url && node.download.name) {
-      stable = { id: node.number, channel: "STABLE", downloads: { "server:default": { name: node.download.name, url: node.download.url } } };
-    }
+    const safeVersion = version.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const data = await paperGraphql(`query { project(key: "paper") { version(key: "${safeVersion}") { builds(first: 50, orderBy: {direction: DESC}) { edges { node { number channel download(key: "server:default") { name url } } } } } } }`);
+    const nodes = data.project?.version?.builds?.edges?.map((x: any) => x.node).filter(Boolean) ?? [];
+    const node = nodes.find((x: any) => x?.channel === "STABLE" && x?.download?.url);
+    if (node?.number && node.download?.url && node.download.name) stable = { id: node.number, channel: "STABLE", downloads: { "server:default": { name: node.download.name, url: node.download.url } } };
   }
 
   if (!stable?.downloads?.["server:default"]?.url) throw new Error(`No stable Paper build is available for Minecraft ${version}`);
-
   const download = stable.downloads["server:default"];
   const response = await fetch(download.url, { headers: { "User-Agent": USER_AGENT, Accept: "application/java-archive,*/*" } });
   if (!response.ok) throw new Error(`Paper download failed: HTTP ${response.status}`);
-
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length < 100_000) throw new Error("Paper download was unexpectedly small");
   fs.writeFileSync(serverJar(id), bytes);
@@ -124,7 +110,6 @@ export async function installPaper(id: string, version: string, port?: number) {
   fs.writeFileSync(path.join(dir, "eula.txt"), "eula=true\n");
   fs.writeFileSync(path.join(dir, "server.properties"), `server-port=${chosenPort}\nmotd=VOID HOST\nview-distance=10\nmax-players=20\n`);
   fs.writeFileSync(path.join(dir, "void-host.json"), JSON.stringify({ version, build: stable.id, jar: download.name }, null, 2));
-
   return { build: stable.id, jar: download.name, bytes: bytes.length };
 }
 
@@ -132,13 +117,9 @@ export function startServer(record: ServerRecord) {
   if (runtimes.has(record.id)) return;
   const jar = serverJar(record.id);
   if (!fs.existsSync(jar)) throw new Error("server.jar is missing. Install Paper first.");
-  const dir = file(record.id);
-  fs.mkdirSync(dir, { recursive: true });
-
+  const dir = file(record.id); fs.mkdirSync(dir, { recursive: true });
   const p = spawn("java", ["-Xms128M", `-Xmx${Math.max(512, record.memory)}M`, "-jar", "server.jar", "--nogui"], { cwd: dir, stdio: ["pipe", "pipe", "pipe"] });
-  const r: Runtime = { process: p, logs: [], startedAt: Date.now() };
-  runtimes.set(record.id, r);
-
+  const r: Runtime = { process: p, logs: [], startedAt: Date.now() }; runtimes.set(record.id, r);
   const onData = (b: Buffer) => b.toString().split(/\r?\n/).filter(Boolean).forEach(x => addLog(record.id, `[${new Date().toLocaleTimeString()}] ${x}`));
   p.stdout.on("data", onData); p.stderr.on("data", onData);
   p.on("error", e => addLog(record.id, `[SYSTEM] Java failed to start: ${e.message}`));
@@ -146,17 +127,7 @@ export function startServer(record: ServerRecord) {
   addLog(record.id, `[SYSTEM] Starting ${record.name} on port ${record.port}`);
 }
 
-export function sendCommand(id: string, command: string) {
-  const r = runtimes.get(id); if (!r) throw new Error("Server is not running");
-  const value = command.trim(); if (!value) return; r.process.stdin.write(value + "\n");
-}
-
-export function stopServer(id: string) {
-  const r = runtimes.get(id); if (!r) return false;
-  r.process.stdin.write("stop\n");
-  setTimeout(() => { if (runtimes.has(id)) r.process.kill("SIGTERM"); }, 15000);
-  return true;
-}
-
+export function sendCommand(id: string, command: string) { const r = runtimes.get(id); if (!r) throw new Error("Server is not running"); const value = command.trim(); if (!value) return; r.process.stdin.write(value + "\n"); }
+export function stopServer(id: string) { const r = runtimes.get(id); if (!r) return false; r.process.stdin.write("stop\n"); setTimeout(() => { if (runtimes.has(id)) r.process.kill("SIGTERM"); }, 15000); return true; }
 export function killServer(id: string) { const r = runtimes.get(id); if (!r) return false; r.process.kill("SIGKILL"); runtimes.delete(id); return true; }
 export async function archiveServer(id: string, output: string) { await execFileAsync("tar", ["-czf", output, "-C", SERVERS_DIR, id]); return output; }
