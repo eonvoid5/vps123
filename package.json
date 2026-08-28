@@ -1,10 +1,10 @@
 {
   "name": "void-host-panel",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
-    "dev": "vite build && concurrently -k \"vite --host 0.0.0.0 --port 5173\" \"PORT=6767 tsx server/index.ts\"",
+    "dev": "concurrently -k \"vite --host 0.0.0.0 --port 6767\" \"tsx server/index.ts\"",
     "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
     "start": "PORT=6767 node dist/server.cjs"
   },
