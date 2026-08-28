@@ -1,0 +1,24 @@
+/* VOID HOST visual hotfix: stronger neon glass, compact manager modal, no white scrollbars */
+:root{--vh-green:#20f58b;--vh-green-2:#0bbf69;--vh-glow:rgba(25,245,133,.42)}
+.app{background-image:linear-gradient(180deg,rgba(1,10,5,.16),rgba(1,12,6,.72)),var(--bg)!important;background-size:cover!important;background-position:center!important}
+.glass{border-color:rgba(72,255,153,.28)!important;box-shadow:0 22px 70px rgba(0,0,0,.46),0 0 32px rgba(25,245,133,.08),inset 0 1px 0 rgba(255,255,255,.09)!important}
+.sidebar nav button,.top-actions button,.topbar>button,.panel-title button,.actions button,.server-tabs button,.back,.userbox button,.files button,.command button,.vhx-dashboard-tools button,.vhx-side-btn{box-shadow:0 0 18px rgba(25,245,133,.10),inset 0 0 12px rgba(25,245,133,.025)!important}
+.sidebar nav button:hover,.top-actions button:hover,.topbar>button:hover,.panel-title button:hover,.actions button:hover,.server-tabs button:hover,.back:hover,.userbox button:hover,.files button:hover,.vhx-dashboard-tools button:hover,.vhx-side-btn:hover{border-color:rgba(52,255,145,.62)!important;box-shadow:0 0 30px rgba(25,245,133,.25),0 0 65px rgba(25,245,133,.08),inset 0 0 20px rgba(25,245,133,.05)!important;transform:translateY(-1px)}
+.primary{box-shadow:0 10px 30px rgba(19,222,113,.34),0 0 28px rgba(30,245,132,.22),inset 0 1px rgba(255,255,255,.22)!important}
+.primary:hover{filter:brightness(1.1);box-shadow:0 14px 42px rgba(19,222,113,.46),0 0 42px rgba(30,245,132,.34),inset 0 1px rgba(255,255,255,.25)!important}
+.card,.panel,.server-hero,.server-tabs{box-shadow:0 22px 70px rgba(0,0,0,.42),0 0 30px rgba(25,245,133,.08),inset 0 1px 0 rgba(255,255,255,.08)!important}
+.card:hover,.panel:hover{border-color:rgba(85,255,164,.42)!important;box-shadow:0 24px 75px rgba(0,0,0,.46),0 0 38px rgba(25,245,133,.14),inset 0 1px 0 rgba(255,255,255,.1)!important}
+body.role-user .sidebar nav button:nth-child(2),body.role-user .sidebar nav button:nth-child(3),body.role-user .hero>.primary{display:flex!important}
+#vhx-modal{padding:16px!important}
+#vhx-card{width:min(780px,calc(100vw - 32px))!important;max-height:80vh!important;overflow:hidden!important;padding:18px!important;border-radius:18px!important;border-color:rgba(66,255,153,.38)!important;box-shadow:0 30px 100px rgba(0,0,0,.72),0 0 45px rgba(25,245,133,.12)!important}
+#vhx-body{max-height:calc(80vh - 105px);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding-right:2px}
+#vhx-body::-webkit-scrollbar{width:0;height:0;display:none}
+.vhx-list{padding-bottom:4px}.vhx-item{min-width:0!important;flex-wrap:nowrap!important;box-shadow:inset 0 0 18px rgba(25,245,133,.025)}
+.vhx-info{min-width:0!important;overflow:hidden}.vhx-info b,.vhx-info small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vhx-item .vhx-btn{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;min-width:92px;justify-content:center;background:linear-gradient(135deg,#28f48c,#08b966)!important;color:#00180b!important;box-shadow:0 0 20px rgba(25,245,133,.25),0 8px 25px rgba(25,245,133,.18)!important;transition:transform .18s,filter .18s,box-shadow .18s!important}
+.vhx-item .vhx-btn:hover{filter:brightness(1.12);transform:translateY(-2px) scale(1.02);box-shadow:0 0 30px rgba(25,245,133,.5),0 10px 34px rgba(25,245,133,.28)!important}
+.vhx-item .vhx-btn:not(:disabled){animation:vhInstallPulse 2.2s ease-in-out infinite}
+@keyframes vhInstallPulse{0%,100%{box-shadow:0 0 18px rgba(25,245,133,.22),0 8px 24px rgba(25,245,133,.14)}50%{box-shadow:0 0 34px rgba(25,245,133,.55),0 8px 30px rgba(25,245,133,.25)}}
+.vhx-delete{animation:vhDeletePulse 1.8s ease-in-out infinite;border-color:rgba(255,82,92,.55)!important;box-shadow:0 0 18px rgba(255,55,70,.16)!important;transition:.2s!important}.vhx-delete:hover{transform:translateY(-1px) scale(1.03);box-shadow:0 0 30px rgba(255,55,70,.42)!important}@keyframes vhDeletePulse{0%,100%{box-shadow:0 0 10px rgba(255,55,70,.12)}50%{box-shadow:0 0 24px rgba(255,55,70,.32)}}
+#vhx-card *{scrollbar-width:none}#vhx-card *::-webkit-scrollbar{width:0;height:0;display:none}
+@media(max-width:700px){#vhx-card{width:calc(100vw - 20px)!important;max-height:84vh!important}#vhx-body{max-height:calc(84vh - 105px)}.vhx-item{align-items:flex-start!important}.vhx-item .vhx-btn{min-width:82px}}
