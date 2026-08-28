@@ -8,6 +8,7 @@ import { loadDB, saveDB, type User } from "./db.js";
 import { createToken, hashPassword, verifyPassword, requireAuth } from "./auth.js";
 import { archiveServer, installPaper, killServer, logs, paperVersions, sendCommand, serverDir, startServer, stopServer, runtime, type ServerRecord } from "./manager.js";
 import { javaInfo, nodeStats, nextFreePort } from "./node.js";
+import { pteroRouter } from "./ptero-features.js";
 
 const app = express();
 const PORT = Number(process.env.PORT || 6767);
@@ -41,7 +42,7 @@ async function ensureAdmin() {
 
 app.get("/api/health", (_q, res) => res.json({ ok: true, panel: "VOID HOST", port: PORT, hostname: os.hostname(), node: process.version }));
 app.get("/api/system", (_q, res) => res.json(nodeStats()));
-app.get("/api/config", (_q, res) => res.json({ name: db().settings.name, panelPort: PORT, minecraft: { supported: ["Paper", "Vanilla"] }, features: ["auth", "servers", "nodes", "allocations", "fleet", "suspend", "console", "files", "paper", "backups", "settings"] }));
+app.get("/api/config", (_q, res) => res.json({ name: db().settings.name, panelPort: PORT, minecraft: { supported: ["Paper", "Vanilla"] }, features: ["auth", "servers", "nodes", "allocations", "fleet", "suspend", "console", "files", "paper", "backups", "settings", "restart", "startup", "network", "schedules", "databases", "subusers", "activity"] }));
 
 app.post("/api/auth/register", async (req, res) => {
   try {
@@ -61,7 +62,6 @@ app.post("/api/auth/login", async (req, res) => {
 });
 app.get("/api/auth/me", requireAuth, (req, res) => res.json({ user: publicUser((req as any).user) }));
 
-// Node / allocation information is deliberately separate from the visual dashboard.
 app.get("/api/node", requireAuth, async (req, res) => {
   if (!admin(req, res)) return;
   const servers = records();
@@ -73,7 +73,6 @@ app.get("/api/allocations", requireAuth, (req, res) => {
   res.json({ ip: "0.0.0.0", ports: records().map(s => ({ port: s.port, serverId: s.id, serverName: s.name })) });
 });
 
-// Normal users can only see servers explicitly assigned to them. Admins see the complete fleet.
 app.get("/api/servers", requireAuth, (req, res) => {
   const u = (req as any).user;
   const list = records().filter(s => u.role === "admin" || (s as any).ownerId === u.id);
@@ -212,6 +211,8 @@ app.post("/api/servers/:id/backup", requireAuth, async (req, res) => {
 app.get("/api/settings", requireAuth, (_q, res) => res.json(db().settings));
 app.put("/api/settings", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); d.settings = { ...d.settings, ...req.body }; saveDB(d); res.json(d.settings); });
 app.get("/api/users", requireAuth, (req, res) => { if (!admin(req, res)) return; res.json(db().users.map(publicUser)); });
+
+app.use("/api/ptero", requireAuth, pteroRouter);
 
 const dist = path.join(root, "dist");
 if (fs.existsSync(dist)) { app.use(express.static(dist)); app.get("*splat", (_q, res) => res.sendFile(path.join(dist, "index.html"))); }
