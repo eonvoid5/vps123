@@ -14,10 +14,22 @@
 .app .live-dot,.app .online-dot{box-shadow:0 0 7px #22f487,0 0 18px rgba(34,244,135,.65)}
 .app .eyebrow{box-shadow:0 0 16px rgba(45,255,143,.12),inset 0 0 12px rgba(45,255,143,.04)}
 .app input:focus,.app select:focus,.app textarea:focus{border-color:rgba(49,244,140,.75);box-shadow:0 0 0 3px rgba(40,240,136,.08),0 0 22px rgba(40,240,136,.16)!important}
-/* User-management surfaces: stronger strokes and readable glass without touching auth. */
 .app [class*="user"]:not(.userbox){border-color:rgba(73,255,155,.30)}
 .app [class*="user"]:not(.userbox):hover{box-shadow:0 0 24px rgba(34,255,132,.12),inset 0 0 20px rgba(34,255,132,.04)}
 @keyframes voidPulse{0%,100%{box-shadow:0 0 10px rgba(34,255,132,.18),0 0 22px rgba(34,255,132,.08)}50%{box-shadow:0 0 16px rgba(34,255,132,.34),0 0 38px rgba(34,255,132,.14)}}
 .app .active,.app .primary{animation:voidPulse 3s ease-in-out infinite}
-/* Never apply these panel animations to authentication pages. */
 .auth,.auth *{animation-name:none}
+
+/* Keep the full admin navigation inside the glass sidebar. The injected
+   Plugin/Mod/Modpack controls must scroll without pushing the account box out. */
+.app .sidebar{height:calc(100vh - 28px);max-height:calc(100vh - 28px);overflow:hidden;min-height:0}
+.app .sidebar nav{min-height:0;flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding-right:2px;scrollbar-width:none}
+.app .sidebar nav::-webkit-scrollbar{width:0;height:0;display:none}
+.app .sidebar .userbox{flex:0 0 auto;margin-top:10px;position:relative;z-index:2}
+.app .sidebar .brand{flex:0 0 auto}
+.app .sidebar nav [data-vhx-section]{flex:0 0 auto}
+.app .sidebar nav [data-vhx-section] .vhx-side-btn{min-height:48px}
+
+@media(max-width:900px){
+  .app .sidebar{height:calc(100vh - 20px);max-height:calc(100vh - 20px)}
+}
