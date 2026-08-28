@@ -1,182 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { createRoot } from "react-dom/client";
-import {
-  Activity, ArrowLeft, ArrowRight, Bell, Boxes, Check, ChevronRight, CircleUserRound,
-  Cloud, Command, Copy, Cpu, Database, Download, FileArchive, FileCode2, FileText,
-  Folder, Gauge, HardDrive, Home, KeyRound, LayoutDashboard, LogIn, Menu, MoreHorizontal,
-  Network, Package, Play, Plus, Power, RefreshCw, Search, Server, Settings, Shield,
-  Sparkles, Terminal as TerminalIcon, Trash2, Upload, Users, X, Zap
-} from "lucide-react";
+import React,{useEffect,useState} from "react";
+import {createRoot} from "react-dom/client";
+import {Activity,ArrowLeft,ChevronRight,File,Folder,HardDrive,LayoutDashboard,LogIn,Menu,Package,Play,Plus,Power,RefreshCw,Save,Server,Settings,Shield,Terminal,Users,X} from "lucide-react";
 import "./styles.css";
 
-type Page = "overview" | "nodes" | "servers" | "deploy" | "fleet" | "api" | "backups" | "users" | "settings";
-type ServerState = "online" | "offline" | "starting";
-
-type GameServer = {
-  id: string; name: string; software: string; version: string; node: string;
-  state: ServerState; players: number; maxPlayers: number; cpu: number; ram: number; disk: number;
-  port: number; uptime: string;
-};
-
-const bg = "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=85";
-
-const seedServers: GameServer[] = [
-  { id:"survival", name:"Survival SMP", software:"Paper", version:"1.21.11", node:"Built-in Node", state:"online", players:32, maxPlayers:100, cpu:21, ram:67, disk:28, port:25565, uptime:"1d 4h 32m" },
-  { id:"skyblock", name:"SkyBlock", software:"Paper", version:"1.21.11", node:"Built-in Node", state:"online", players:12, maxPlayers:50, cpu:18, ram:61, disk:21, port:25566, uptime:"23h 17m" },
-  { id:"prison", name:"Prison Realm", software:"Paper", version:"1.21.11", node:"Built-in Node", state:"starting", players:0, maxPlayers:100, cpu:12, ram:45, disk:19, port:25567, uptime:"—" },
-  { id:"mini", name:"Minigames", software:"Paper", version:"1.21.11", node:"Built-in Node", state:"offline", players:0, maxPlayers:50, cpu:0, ram:0, disk:16, port:25568, uptime:"—" },
-];
-
-const logLines = [
-  ["[18:16:24]","[Server]","Starting Survival SMP...","info"],
-  ["[18:16:24]","[System]","Java 21.0.2 detected","info"],
-  ["[18:16:25]","[System]","Loading server files...","info"],
-  ["[18:16:27]","[System]","Preparing world 'world'","info"],
-  ["[18:16:29]","[Server]","Enabling plugins (24/24)","info"],
-  ["[18:16:32]","[Server]","Done (3.42s)! For help, type \"help\"","info"],
-  ["[18:16:33]","[User]","Admin joined the game","user"],
-  ["[18:16:39]","[User]","Steve joined the game","user"],
-  ["[18:16:42]","[User]","Alex joined the game","user"],
-  ["[18:16:46]","[Server]","World saved","info"],
-  ["[18:16:49]","[Warning]","Ground items will be removed in 60 seconds!","warn"],
-  ["[18:17:06]","[User]","Zombie was slain by Steve","user"],
-  ["[18:17:10]","[User]","Welcome to Survival SMP!","user"],
-];
-
-function App() {
-  const [page, setPage] = useState<Page>("overview");
-  const [mobile, setMobile] = useState(false);
-  const [servers, setServers] = useState(seedServers);
-  const [selected, setSelected] = useState<GameServer | null>(null);
-  const [search, setSearch] = useState("");
-  const [notice, setNotice] = useState("");
-  const [auth, setAuth] = useState<"login"|"register"|null>(null);
-
-  const filtered = useMemo(() => servers.filter(s => s.name.toLowerCase().includes(search.toLowerCase())), [servers, search]);
-
-  const flash = (msg: string) => { setNotice(msg); window.setTimeout(() => setNotice(""), 2400); };
-
-  const updateState = (id: string, state: ServerState) => {
-    setServers(v => v.map(s => s.id === id ? {...s, state, uptime: state === "online" ? "00h 00m" : "—"} : s));
-    if (selected?.id === id) setSelected(v => v ? {...v, state} : v);
-    flash(state === "online" ? "Server started" : state === "offline" ? "Server stopped" : "Server starting");
-  };
-
-  if (auth) return <AuthPage mode={auth} onBack={() => setAuth(null)} onSuccess={() => setAuth(null)} />;
-
-  return (
-    <div className="app" style={{"--bg": `url(${bg})`} as React.CSSProperties}>
-      <div className="backdrop"/>
-      <aside className={"sidebar glass " + (mobile ? "mobile-open" : "")}>
-        <div className="brand"><div className="brand-mark"><Boxes size={22}/></div><span>VOID<span> HOST</span></span></div>
-        <nav>
-          {([
-            ["overview","Overview",LayoutDashboard],["nodes","Nodes",Server],["servers","Servers",Boxes],
-            ["deploy","Deploy",Plus],["fleet","Fleet",Network],["api","API Keys",KeyRound],
-            ["backups","Backups",FileArchive],["users","Users",Users],["settings","Settings",Settings]
-          ] as const).map(([key,label,Icon]) => (
-            <button key={key} className={"nav-item " + (page===key ? "active" : "")}
-              onClick={() => {setPage(key);setSelected(null);setMobile(false)}}>
-              <Icon size={18}/><span>{label}</span><ChevronRight size={15} className="nav-arrow"/>
-            </button>
-          ))}
-        </nav>
-        <div className="profile glass-soft"><div className="avatar">A</div><div><b>Admin</b><small>Owner</small></div><span className="online-dot"/></div>
-      </aside>
-
-      <main className="main">
-        <header className="topbar">
-          <button className="icon-btn mobile-menu" onClick={() => setMobile(!mobile)}><Menu size={20}/></button>
-          <div className="search glass"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search anything..."/><kbd>⌘ K</kbd></div>
-          <div className="top-actions"><button className="icon-btn glass" title="System"><Activity size={18}/></button><button className="icon-btn glass" title="Notifications"><Bell size={18}/><i/></button><button className="icon-btn glass" title="Account"><CircleUserRound size={18}/></button></div>
-        </header>
-
-        {selected ? (
-          <ServerConsole server={selected} onBack={() => setSelected(null)} onState={updateState} flash={flash}/>
-        ) : page === "overview" ? (
-          <Overview servers={servers} onOpen={s=>setSelected(s)} onNavigate={setPage}/>
-        ) : page === "servers" ? (
-          <ServersPage servers={filtered} onOpen={s=>setSelected(s)} onCreate={()=>setPage("deploy")} onState={updateState}/>
-        ) : (
-          <PlaceholderPage page={page} servers={servers} onOpen={s=>setSelected(s)} onNavigate={setPage} flash={flash}/>
-        )}
-      </main>
-
-      {notice && <div className="toast glass"><Check size={18}/><span>{notice}</span></div>}
-      <div className="sr-only" aria-live="polite">{notice}</div>
-    </div>
-  );
-}
-
-function PageTitle({eyebrow,title,sub}:{eyebrow?:string,title:string,sub?:string}) {
-  return <div className="page-title">{eyebrow && <span className="eyebrow"><Sparkles size={14}/>{eyebrow}</span>}<h1>{title}</h1>{sub&&<p>{sub}</p>}</div>
-}
-
-function Metric({icon:Icon,label,value,meta,accent="green"}:{icon:any,label:string,value:string,meta:string,accent?:string}) {
-  return <div className="metric glass card-hover"><div className={"metric-icon "+accent}><Icon size={21}/></div><div><small>{label}</small><strong>{value}</strong><span>{meta}</span></div></div>
-}
-
-function Gauge({label,value}:{label:string,value:number}) {
-  const deg = Math.min(360, Math.max(0, value*3.6));
-  return <div className="gauge-wrap"><span>{label}</span><div className="gauge" style={{"--deg": `${deg}deg`} as React.CSSProperties}><b>{value}%</b></div></div>
-}
-
-function Overview({servers,onOpen,onNavigate}:{servers:GameServer[],onOpen:(s:GameServer)=>void,onNavigate:(p:Page)=>void}) {
-  const online = servers.filter(s=>s.state==="online").length;
-  const players = servers.reduce((a,s)=>a+s.players,0);
-  return <div className="content">
-    <PageTitle eyebrow="SYSTEM.CORE — ACCESS GRANTED" title="Welcome back, Admin 👋" sub="Here's what's happening with your servers today."/>
-    <div className="metrics"><Metric icon={Server} label="NODES" value="1" meta="● Online"/><Metric icon={Boxes} label="SERVERS" value={String(servers.length)} meta={`● ${online} online`} accent="cyan"/><Metric icon={Users} label="PLAYERS" value={String(players)} meta="● All Servers" accent="lime"/><Metric icon={Gauge} label="UPTIME" value="99.98%" meta="● Network" accent="green"/></div>
-    <div className="grid-2">
-      <section className="panel glass"><div className="panel-head"><h2>SYSTEM LOAD</h2><span className="live-pill"><i/> LIVE</span></div><div className="gauges"><Gauge label="CPU" value={21}/><Gauge label="RAM" value={67}/><Gauge label="DISK" value={28}/></div><MiniChart/></section>
-      <section className="panel glass"><div className="panel-head"><h2>ACTIVE SERVERS</h2><button className="ghost-btn" onClick={()=>onNavigate("servers")}>View All</button></div><div className="server-mini-list">{servers.map(s=><button className="server-mini" key={s.id} onClick={()=>onOpen(s)}><span className="cube"><Boxes size={17}/></span><b>{s.name}</b><span className={"status "+s.state}><i/>{s.state}</span><small>{s.players}/{s.maxPlayers}</small></button>)}</div></section>
-    </div>
-    <div className="grid-2 bottom-grid">
-      <section className="panel glass"><div className="panel-head"><h2>RECENT ACTIVITY</h2><span>Just now</span></div><div className="activity">{["Survival SMP started","SkyBlock backup completed","Prison Realm is starting","Minigames stopped"].map((x,i)=><div key={x}><span className={"activity-dot d"+i}/><b>{x}</b><small>{i===0?"Just now":`${i*5}m ago`}</small></div>)}</div></section>
-      <section className="panel glass"><div className="panel-head"><h2>RESOURCE USAGE</h2><select><option>This Hour</option><option>Today</option><option>Week</option></select></div><ResourceChart/></section>
-    </div>
-  </div>
-}
-
-function MiniChart() {
-  return <svg className="line-chart" viewBox="0 0 600 110" preserveAspectRatio="none"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stopColor="#10f58a"/><stop offset="1" stopColor="#55ffbd"/></linearGradient></defs><path d="M0 80 C45 55 65 98 105 67 S165 45 205 76 S270 55 310 73 S370 95 415 60 S470 44 505 70 S550 82 600 45" fill="none" stroke="url(#g)" strokeWidth="3"/><path d="M0 80 C45 55 65 98 105 67 S165 45 205 76 S270 55 310 73 S370 95 415 60 S470 44 505 70 S550 82 600 45 L600 110 L0 110Z" fill="url(#g)" opacity=".08"/></svg>
-}
-
-function ResourceChart() {
-  const data = [{x:"18:00",cpu:32,ram:42,disk:28},{x:"18:15",cpu:48,ram:35,disk:42},{x:"18:30",cpu:39,ram:52,disk:45},{x:"18:45",cpu:72,ram:48,disk:38},{x:"19:00",cpu:58,ram:67,disk:46}];
-  return <div className="resource-chart"><div className="legend"><span className="l-green">● CPU</span><span className="l-blue">● RAM</span><span className="l-purple">● DISK</span></div><div className="bars">{data.map((d,i)=><div className="bar-col" key={d.x}><div className="bar cpu" style={{height:d.cpu+"%"}}/><div className="bar ram" style={{height:d.ram+"%"}}/><div className="bar disk" style={{height:d.disk+"%"}}/><small>{i%2===0?d.x:""}</small></div>)}</div></div>
-}
-
-function ServersPage({servers,onOpen,onCreate,onState}:{servers:GameServer[],onOpen:(s:GameServer)=>void,onCreate:()=>void,onState:(id:string,state:ServerState)=>void}) {
-  return <div className="content"><div className="title-row"><PageTitle eyebrow="SERVERS / MANAGE" title="Minecraft Servers" sub="Control your instances, resources and players."/><button className="primary-btn" onClick={onCreate}><Plus size={18}/> Create Server</button></div><section className="table-panel glass"><div className="table-toolbar"><div className="table-search"><Search size={17}/><input placeholder="Search servers..."/></div><span>{servers.length} servers</span></div><div className="table-wrap"><table><thead><tr><th>SERVER</th><th>NODE</th><th>STATUS</th><th>PLAYERS</th><th>UPTIME</th><th>CPU</th><th>RAM</th><th>ACTIONS</th></tr></thead><tbody>{servers.map(s=><tr key={s.id}><td><button className="name-btn" onClick={()=>onOpen(s)}><span className="cube"><Boxes size={16}/></span><b>{s.name}</b><small>{s.software} {s.version}</small></button></td><td>{s.node}</td><td><span className={"status "+s.state}><i/>{s.state}</span></td><td>{s.players}/{s.maxPlayers}</td><td>{s.uptime}</td><td>{s.cpu}%</td><td>{s.ram}%</td><td><div className="row-actions"><button className="tiny-btn" onClick={()=>onState(s.id,s.state==="online"?"offline":"online")}>{s.state==="online"?<Power size={15}/>:<Play size={15}/>}</button><button className="tiny-btn" onClick={()=>onOpen(s)}><TerminalIcon size={15}/></button><button className="tiny-btn"><MoreHorizontal size={15}/></button></div></td></tr>)}</tbody></table></div></section></div>
-}
-
-function ServerConsole({server,onBack,onState,flash}:{server:GameServer,onBack:()=>void,onState:(id:string,state:ServerState)=>void,flash:(s:string)=>void}) {
-  const [command,setCommand]=useState("");
-  const [logs,setLogs]=useState(logLines);
-  const send = () => { if(!command.trim()) return; setLogs(v=>[...v,[new Date().toLocaleTimeString(),"[Console]",command,"user"]]); setCommand(""); flash("Command sent"); };
-  return <div className="content console-page">
-    <div className="server-header"><button className="back-btn glass" onClick={onBack}><ArrowLeft size={18}/></button><div className="server-title"><div className="cube big"><Boxes size={24}/></div><div><h1>{server.name}</h1><span className={"status "+server.state}><i/>{server.state} · {server.software} {server.version}</span></div></div><div className="server-actions"><button className="primary-btn" onClick={()=>onState(server.id,"online")}><Play size={16}/> Start</button><button className="warning-btn" onClick={()=>{onState(server.id,"starting");window.setTimeout(()=>onState(server.id,"online"),900)}}><RefreshCw size={16}/> Restart</button><button className="danger-btn" onClick={()=>onState(server.id,"offline")}><Power size={16}/> Stop</button></div></div>
-    <div className="console-layout">
-      <aside className="server-nav glass"><button className="selected"><TerminalIcon size={17}/> Console</button><button><Folder size={17}/> Files</button><button><Users size={17}/> Players <em>{server.players}</em></button><button><Package size={17}/> Plugins <em>24</em></button><button><Settings size={17}/> Settings</button><button><FileArchive size={17}/> Backups</button><button><Shield size={17}/> SFTP</button><button><Activity size={17}/> Activity</button></aside>
-      <section className="console-panel glass"><div className="console-toolbar"><div><b>CONSOLE</b><span>LIVE LOG STREAM</span></div><div className="console-tools"><button className="tiny-btn" onClick={()=>setLogs([])}>Clear</button><button className="tiny-btn" onClick={()=>setLogs(logLines)}>Reset</button><label>Auto Scroll <input type="checkbox" defaultChecked/></label><button className="tiny-btn"><Search size={15}/></button></div></div><div className="logs">{logs.map((l,i)=><div className="log-line" key={i}><span className="time">{l[0]}</span><span className={"tag "+l[3]}>{l[1]}</span><span>{l[2]}</span></div>)}</div><div className="command-box"><span>&gt;</span><input value={command} onChange={e=>setCommand(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Type a server command..."/><button className="send-btn" onClick={send}><ArrowRight size={18}/></button></div></section>
-      <aside className="server-stats glass"><h3>SERVER STATUS</h3><span className={"status "+server.state}><i/>{server.state}</span><div className="stat"><small>UPTIME</small><b>{server.uptime}</b></div><div className="stat"><small>TPS</small><b>{server.state==="online"?"19.98 / 20.0":"—"}</b></div><div className="stat"><small>CPU USAGE</small><b>{server.cpu}%</b><MiniChart/></div><div className="stat"><small>MEMORY USAGE</small><b>{server.ram}%</b><div className="meter"><i style={{width:server.ram+"%"}}/></div></div><div className="stat"><small>DISK USAGE</small><b>{server.disk}%</b><div className="meter"><i style={{width:server.disk+"%"}}/></div></div></aside>
-    </div>
-  </div>
-}
-
-function PlaceholderPage({page,servers,onOpen,onNavigate,flash}:{page:Page,servers:GameServer[],onOpen:(s:GameServer)=>void,onNavigate:(p:Page)=>void,flash:(s:string)=>void}) {
-  const titles:Record<Page,string>={nodes:"Nodes",servers:"Servers",deploy:"Deploy",fleet:"Fleet",api:"API Keys",backups:"Backups",users:"Users",settings:"Admin Settings",overview:"Overview"};
-  return <div className="content"><PageTitle eyebrow="VOID HOST CONTROL PLANE" title={titles[page]} sub="This module is part of the production foundation and is ready for the next integration pass."/><div className="feature-grid">{["Live telemetry","Glass file manager","Minecraft runtime","Backups & restore","SFTP access","Users & permissions"].map((x,i)=><div className="feature glass card-hover" key={x}><span className="feature-icon"><Zap size={18}/></span><b>{x}</b><small>Architecture reserved · safe to extend</small></div>)}</div><div className="callout glass"><Shield size={20}/><div><b>No fake success states</b><p>Server actions in this first build are isolated to the local UI. The Minecraft process manager will be connected only after the API and security layer are validated.</p></div></div></div>
-}
-
-function AuthPage({mode,onBack,onSuccess}:{mode:"login"|"register",onBack:()=>void,onSuccess:()=>void}) {
-  const [register,setRegister]=useState(mode==="register");
-  return <div className="auth-page" style={{"--bg":`url(${bg})`} as React.CSSProperties}><div className="auth-backdrop"/><button className="back-btn glass auth-back" onClick={onBack}><ArrowLeft size={18}/></button><div className="auth-card glass"><div className="brand centered"><div className="brand-mark"><Boxes size={28}/></div><span>VOID<span> HOST</span></span></div><p className="auth-sub">{register?"Create your account":"Next-gen Minecraft hosting"}</p><div className="form">{register&&<Field icon={CircleUserRound} placeholder="Username"/>}<Field icon={register?CircleUserRound:LogIn} placeholder={register?"Email":"Email or Username"}/><Field icon={KeyRound} placeholder="Password" password/>{register&&<Field icon={KeyRound} placeholder="Confirm Password" password/>}{register&&<label className="check"><input type="checkbox"/> I agree to the <span>Terms of Service</span> & <span>Privacy Policy</span></label>}<button className="primary-btn wide" onClick={onSuccess}>{register?"Create Account":"Sign In"}<ArrowRight size={17}/></button></div><div className="auth-switch">{register?"Already have an account?":"Don't have an account?"} <button onClick={()=>setRegister(!register)}>{register?"Sign in":"Register now"}</button></div></div></div>
-}
-
-function Field({icon:Icon,placeholder,password=false}:{icon:any,placeholder:string,password?:boolean}) {
-  return <label className="field"><Icon size={17}/><input type={password?"password":"text"} placeholder={placeholder}/>{password&&<Shield size={15}/>}</label>
-}
-
-createRoot(document.getElementById("root")!).render(<React.StrictMode><App/></React.StrictMode>);
+type Server={id:string;name:string;software:string;version:string;port:number;memory:number;createdAt:string;status:string};
+type User={id:string;username:string;role:string};
+const api=async(path:string,options:RequestInit={})=>{const token=localStorage.getItem("void_token");const headers=new Headers(options.headers);if(options.body&&!headers.has("Content-Type"))headers.set("Content-Type","application/json");if(token)headers.set("Authorization",`Bearer ${token}`);const r=await fetch(path,{...options,headers});const text=await r.text();let d:any;try{d=JSON.parse(text)}catch{d=text}if(!r.ok)throw new Error(d?.error||`HTTP ${r.status}`);return d};
+function Auth({onLogin}:{onLogin:(u:User)=>void}){const [mode,setMode]=useState<"login"|"register">("login"),[username,setUsername]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState("");const submit=async(e:React.FormEvent)=>{e.preventDefault();setError("");try{const d=await api(`/api/auth/${mode}`,{method:"POST",body:JSON.stringify({username,password})});localStorage.setItem("void_token",d.token);onLogin(d.user)}catch(e){setError(String(e).replace("Error: ",""))}};return <div className="auth"><div className="auth-card"><div className="logo"><Shield/> VOID HOST</div><h1>{mode==="login"?"Welcome back":"Create your account"}</h1><p>{mode==="login"?"Sign in to manage your Minecraft infrastructure.":"The first registered account becomes the owner."}</p><form onSubmit={submit}><label>Username<input value={username} onChange={e=>setUsername(e.target.value)} minLength={3} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength={6} required/></label>{error&&<div className="error">{error}</div>}<button className="primary" type="submit"><LogIn size={17}/>{mode==="login"?"Sign in":"Register"}</button></form><button className="link" onClick={()=>setMode(mode==="login"?"register":"login")}>{mode==="login"?"Need an account? Register":"Already registered? Sign in"}</button></div></div>}
+function App(){const [user,setUser]=useState<User|null>(null),[loading,setLoading]=useState(true);useEffect(()=>{api("/api/auth/me").then(d=>setUser(d.user)).catch(()=>{}).finally(()=>setLoading(false))},[]);if(loading)return <div className="loading">Starting VOID HOST…</div>;if(!user)return <Auth onLogin={setUser}/>;return <Panel user={user} onLogout={()=>{localStorage.removeItem("void_token");setUser(null)}}/>}
+function Panel({user,onLogout}:{user:User;onLogout:()=>void}){const [page,setPage]=useState("dashboard"),[selected,setSelected]=useState<Server|null>(null),[mobile,setMobile]=useState(false);const nav=[['dashboard','Dashboard',LayoutDashboard],['servers','Servers',Server],['deploy','Create Server',Plus],['backups','Backups',HardDrive],['users','Users',Users],['settings','Settings',Settings]] as const;return <div className="app"><aside className={mobile?"sidebar open":"sidebar"}><div className="brand"><span>◆</span> VOID HOST</div><nav>{nav.map(([k,l,I])=><button className={page===k&&!selected?'active':''} key={k} onClick={()=>{setSelected(null);setPage(k);setMobile(false)}}><I size={18}/>{l}<ChevronRight size={14}/></button>)}</nav><div className="userbox"><b>{user.username}</b><small>{user.role}</small><button onClick={onLogout}>Sign out</button></div></aside><main><header><button className="menu" onClick={()=>setMobile(!mobile)}><Menu/></button><div><b>VOID HOST</b><small> · Minecraft control plane</small></div><button onClick={()=>location.reload()}><RefreshCw size={17}/></button></header>{selected?<ServerPage server={selected} back={()=>setSelected(null)}/>:page==="dashboard"?<Dashboard open={setSelected} go={setPage}/>:page==="servers"?<Servers open={setSelected} go={setPage}/>:page==="deploy"?<Create onCreated={s=>setSelected(s)}/>:page==="settings"?<SettingsPage/>:page==="users"?<UsersPage user={user}/>:<Backups/>}</main></div>}
+function Dashboard({open,go}:{open:(s:Server)=>void;go:(p:string)=>void}){const [servers,setServers]=useState<Server[]>([]),[system,setSystem]=useState<any>({});const load=()=>Promise.all([api('/api/servers'),api('/api/system')]).then(([s,sys])=>{setServers(s);setSystem(sys)});useEffect(()=>{load();const t=setInterval(load,5000);return()=>clearInterval(t)},[]);const online=servers.filter(s=>s.status==='online').length;return <div className="content"><div className="hero"><div><span className="eyebrow">LIVE VPS NODE</span><h1>Dashboard</h1><p>Real telemetry and real Minecraft processes.</p></div><button className="primary" onClick={()=>go('deploy')}><Plus size={18}/> Create server</button></div><div className="cards"><Card icon={Server} title="Servers" value={String(servers.length)} sub={`${online} online`}/><Card icon={Activity} title="CPU load" value={`${(system.cpu||0).toFixed(2)}`} sub={`${system.cores||0} cores`}/><Card icon={HardDrive} title="Memory" value={system.ramTotal?`${Math.round(system.ramUsed/system.ramTotal*100)}%`:'—'} sub={system.ramTotal?`${Math.round(system.ramUsed/1073741824)} / ${Math.round(system.ramTotal/1073741824)} GB`:''}/><Card icon={Package} title="Java" value="Runtime" sub="Used by Minecraft"/></div><section className="panel"><div className="panel-title"><h2>Your servers</h2><button onClick={()=>go('servers')}>View all</button></div>{servers.length?<div className="server-grid">{servers.map(s=><ServerCard key={s.id}s={s}open={()=>open(s)}/>)}</div>:<Empty text="No Minecraft servers yet. Create one to download Paper and run it."/>}</section></div>}
+function Card({icon:I,title,value,sub}:{icon:any;title:string;value:string;sub:string}){return <div className="card"><I size={20}/><small>{title}</small><strong>{value}</strong><span>{sub}</span></div>}
+function Empty({text}:{text:string}){return <div className="empty">{text}</div>}
+function ServerCard({s,open}:{s:Server;open:()=>void}){return <button className="server-card" onClick={open}><div className="server-icon"><Server/></div><div><b>{s.name}</b><span>{s.software} {s.version} · :{s.port}</span></div><em className={s.status}>{s.status}</em></button>}
+function Servers({open,go}:{open:(s:Server)=>void;go:(p:string)=>void}){const [servers,setServers]=useState<Server[]>([]);const load=()=>api('/api/servers').then(setServers).catch(console.error);useEffect(()=>{load()},[]);return <div className="content"><div className="hero"><div><h1>Servers</h1><p>Manage real processes running on this VPS.</p></div><button className="primary" onClick={()=>go('deploy')}><Plus/> Create server</button></div><section className="panel">{servers.length?<div className="list">{servers.map(s=><ServerCard key={s.id}s={s}open={()=>open(s)}/>)}</div>:<Empty text="No servers created."/>}</section></div>}
+function Create({onCreated}:{onCreated:(s:Server)=>void}){const [name,setName]=useState('My Minecraft Server'),[version,setVersion]=useState(''),[memory,setMemory]=useState(2048),[versions,setVersions]=useState<string[]>([]),[busy,setBusy]=useState(false),[msg,setMsg]=useState('');useEffect(()=>{api('/api/paper/versions').then(d=>{setVersions(d.versions);if(d.versions[0])setVersion(d.versions[0])}).catch(e=>setMsg(String(e)))},[]);const create=async()=>{setBusy(true);setMsg('Creating server…');try{const s=await api('/api/servers',{method:'POST',body:JSON.stringify({name,version,memory})});setMsg('Downloading PaperMC…');await api(`/api/servers/${s.id}/install`,{method:'POST',body:JSON.stringify({version})});setMsg('Paper installed.');onCreated({...s,version})}catch(e){setMsg(String(e).replace('Error: ',''))}finally{setBusy(false)}};return <div className="content narrow"><h1>Create Minecraft server</h1><p className="lead">Creates a real server directory and downloads the latest Paper build.</p><section className="panel form"><label>Server name<input value={name}onChange={e=>setName(e.target.value)}/></label><label>Paper version<select value={version}onChange={e=>setVersion(e.target.value)}>{versions.map(v=><option key={v}>{v}</option>)}</select></label><label>RAM (MB)<input type="number" min={512} step={256} value={memory}onChange={e=>setMemory(Number(e.target.value))}/></label><button className="primary" disabled={busy||!version} onClick={create}><Package/>{busy?'Working…':'Create & install Paper'}</button>{msg&&<div className="notice">{msg}</div>}</section></div>}
+function ServerPage({server:initial,back}:{server:Server;back:()=>void}){const [s,setS]=useState(initial),[logs,setLogs]=useState<string[]>([]),[cmd,setCmd]=useState(''),[tab,setTab]=useState<'console'|'files'>('console'),[files,setFiles]=useState<any[]>([]),[dir,setDir]=useState(''),[file,setFile]=useState<string|null>(null),[content,setContent]=useState('');const refresh=()=>api(`/api/servers/${s.id}/console`).then(d=>{setLogs(d.logs);setS(v=>({...v,status:d.running?'online':'offline'}))});useEffect(()=>{refresh();const t=setInterval(refresh,1500);return()=>clearInterval(t)},[s.id]);const act=async(a:string)=>{try{await api(`/api/servers/${s.id}/${a}`,{method:'POST'});refresh()}catch(e){alert(String(e))}};const command=async()=>{if(!cmd)return;try{await api(`/api/servers/${s.id}/command`,{method:'POST',body:JSON.stringify({command:cmd})});setCmd('');refresh()}catch(e){alert(String(e))}};const loadFiles=()=>api(`/api/servers/${s.id}/files?path=${encodeURIComponent(dir)}`).then(d=>setFiles(d.items));useEffect(()=>{if(tab==='files')loadFiles()},[tab,dir]);const openFile=async(name:string)=>{const p=dir?`${dir}/${name}`:name;try{const d=await api(`/api/servers/${s.id}/file?path=${encodeURIComponent(p)}`);setFile(p);setContent(d)}catch(e){alert(String(e))}};const save=async()=>{await api(`/api/servers/${s.id}/file`,{method:'PUT',body:JSON.stringify({path:file,content})});setFile(null);loadFiles()};return <div className="content"><button className="back" onClick={back}><ArrowLeft/> Servers</button><div className="hero"><div><span className="eyebrow">{s.software} {s.version} · :{s.port}</span><h1>{s.name}</h1><p>Java process · {s.memory} MB RAM</p></div><div className="actions"><button className="primary" onClick={()=>act('start')}><Play/> Start</button><button className="danger" onClick={()=>act('stop')}><Power/> Stop</button><button onClick={()=>act('kill')}><X/> Kill</button></div></div><div className="tabs"><button className={tab==='console'?'selected':''}onClick={()=>setTab('console')}><Terminal/> Console</button><button className={tab==='files'?'selected':''}onClick={()=>setTab('files')}><Folder/> Files</button></div>{tab==='console'?<section className="console panel"><div className="logs">{logs.length?logs.map((l,i)=><div key={i}>{l}</div>):<span>No runtime output. Start the server.</span>}</div><div className="command"><span>$</span><input value={cmd}onChange={e=>setCmd(e.target.value)}onKeyDown={e=>e.key==='Enter'&&command()}placeholder="Minecraft console command…"/><button onClick={command}>Send</button></div></section>:<section className="panel"><div className="filebar"><button onClick={()=>setDir(dir.split('/').slice(0,-1).join('/'))}>Up</button><b>/{dir}</b><button onClick={loadFiles}><RefreshCw/></button></div><div className="files">{files.map(x=><button key={x.name}onClick={()=>x.type==='directory'?setDir(dir?`${dir}/${x.name}`:x.name):openFile(x.name)}>{x.type==='directory'?<Folder/>:<File/>}<span>{x.name}</span><small>{x.type}</small></button>)}</div>{file&&<div className="editor"><div><b>{file}</b><button onClick={()=>setFile(null)}><X/></button></div><textarea value={content}onChange={e=>setContent(e.target.value)}/><button className="primary"onClick={save}><Save/> Save</button></div>}</section>}</div>}
+function SettingsPage(){const [s,setS]=useState<any>({}),[msg,setMsg]=useState('');useEffect(()=>{api('/api/settings').then(setS)},[]);const save=async()=>{await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});setMsg('Saved on VPS. Refresh the panel to apply the new background.')};return <div className="content narrow"><h1>Panel settings</h1><p className="lead">Customize the panel and persist it on the server.</p><section className="panel form"><label>Panel name<input value={s.name||''}onChange={e=>setS({...s,name:e.target.value})}/></label><label>Background URL<input value={s.background||''}onChange={e=>setS({...s,background:e.target.value})}placeholder="https://…"/></label><label>Accent<input value={s.accent||''}onChange={e=>setS({...s,accent:e.target.value})}/></label><label>Glass opacity<input type="number" min="0" max="1" step=".01" value={s.glassOpacity??.18}onChange={e=>setS({...s,glassOpacity:Number(e.target.value)})}/></label><label>Blur (px)<input type="number" min="0" max="40" value={s.blur??18}onChange={e=>setS({...s,blur:Number(e.target.value)})}/></label><button className="primary"onClick={save}><Save/> Save customization</button>{msg&&<div className="notice">{msg}</div>}</section></div>}
+function UsersPage({user}:{user:User}){const [users,setUsers]=useState<User[]>([]);useEffect(()=>{api('/api/users').then(setUsers).catch(()=>{})},[]);return <div className="content"><h1>Users</h1><p className="lead">Panel accounts.</p>{user.role==='admin'?<section className="panel list">{users.map(u=><div className="userrow"key={u.id}><Users size={18}/><b>{u.username}</b><span>{u.role}</span></div>)}</section>:<Empty text="Admin access required."/>}</div>}
+function Backups(){return <div className="content"><h1>Backups</h1><p className="lead">Backups are stored under data/backups on the VPS.</p><section className="panel"><Empty text="Open a server and use the real filesystem/console tools. Backup endpoint is available to the panel backend."/></section></div>}
+createRoot(document.getElementById('root')!).render(<App/>);
