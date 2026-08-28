@@ -1,12 +1,12 @@
 {
   "name": "void-host-panel",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"vite --host 0.0.0.0 --port 6767\" \"tsx server/index.ts\"",
+    "dev": "concurrently -k \"vite --host 0.0.0.0 --port 6969\" \"tsx server/index.ts\"",
     "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
-    "start": "PORT=6767 node dist/server.cjs"
+    "start": "PORT=6969 node dist/server.cjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
