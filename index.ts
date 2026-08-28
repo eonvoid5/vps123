@@ -3,10 +3,9 @@ import cors from "cors";
 import path from "node:path";
 import fs from "node:fs";
 import os from "node:os";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, "..");
+const ROOT_DIR = process.cwd();
+const root = ROOT_DIR;
 const app = express();
 const PORT = Number(process.env.PORT || 6767);
 
