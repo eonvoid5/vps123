@@ -8,10 +8,11 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <title>VOID HOST</title>
     <link rel="stylesheet" href="/ui-polish.css" />
+    <link rel="stylesheet" href="/void-hotfix.css" />
     <style>
       body.role-user .sidebar nav button:nth-child(2),
       body.role-user .sidebar nav button:nth-child(3),
-      body.role-user .hero > .primary { display:none !important; }
+      body.role-user .hero > .primary { display:flex !important; }
       #boot-error { display:none; position:fixed; inset:20px; z-index:99999; padding:22px; border-radius:16px; background:#120b0c; color:#ffd9dc; border:1px solid #ff5964; font:14px/1.5 monospace; white-space:pre-wrap; overflow:auto; }
     </style>
     <script>
@@ -22,35 +23,18 @@
           box.style.display = 'block';
           box.textContent = title + '\n\n' + String(value || 'Unknown error');
         }
-        window.addEventListener('error', function (e) {
-          show('VOID HOST failed to start:', e.error?.stack || e.message || 'Unknown browser error');
-        });
-        window.addEventListener('unhandledrejection', function (e) {
-          show('VOID HOST startup error:', e.reason?.stack || e.reason || 'Unknown promise error');
-        });
+        window.addEventListener('error', function (e) { show('VOID HOST failed to start:', e.error?.stack || e.message || 'Unknown browser error'); });
+        window.addEventListener('unhandledrejection', function (e) { show('VOID HOST startup error:', e.reason?.stack || e.reason || 'Unknown promise error'); });
         var originalError = console.error;
-        console.error = function () {
-          try {
-            var text = Array.prototype.slice.call(arguments).map(function (x) {
-              return x && x.stack ? x.stack : (typeof x === 'string' ? x : JSON.stringify(x));
-            }).join('\n');
-            if (/error|exception|crash|uncaught|react/i.test(text)) show('VOID HOST React/runtime error:', text);
-          } catch (_) {}
-          return originalError.apply(console, arguments);
-        };
+        console.error = function () { try { var text = Array.prototype.slice.call(arguments).map(function (x) { return x && x.stack ? x.stack : (typeof x === 'string' ? x : JSON.stringify(x)); }).join('\n'); if (/error|exception|crash|uncaught|react/i.test(text)) show('VOID HOST React/runtime error:', text); } catch (_) {} return originalError.apply(console, arguments); };
       })();
       (async function roleGuard(){
-        try {
-          const token=localStorage.getItem('void_token');
-          if(token){
-            const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
-            if(r.ok){const d=await r.json();document.body.classList.add('role-'+d.user.role)}
-          }
-        }catch(e){}
+        try { const token=localStorage.getItem('void_token'); if(token){ const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'}); if(r.ok){const d=await r.json();document.body.classList.add('role-'+d.user.role)} } }catch(e){}
         setTimeout(roleGuard,1500);
       })();
     </script>
     <script src="/void-enhancements.js" defer></script>
+    <script src="/void-hotfix.js" defer></script>
   </head>
   <body>
     <div id="boot-error"></div>
