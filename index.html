@@ -14,14 +14,30 @@
       #boot-error { display:none; position:fixed; inset:20px; z-index:99999; padding:22px; border-radius:16px; background:#120b0c; color:#ffd9dc; border:1px solid #ff5964; font:14px/1.5 monospace; white-space:pre-wrap; overflow:auto; }
     </style>
     <script>
-      window.addEventListener('error', function (e) {
-        var box = document.getElementById('boot-error');
-        if (box) { box.style.display = 'block'; box.textContent = 'VOID HOST failed to start:\n\n' + (e.error?.stack || e.message || 'Unknown browser error'); }
-      });
-      window.addEventListener('unhandledrejection', function (e) {
-        var box = document.getElementById('boot-error');
-        if (box) { box.style.display = 'block'; box.textContent = 'VOID HOST startup error:\n\n' + (e.reason?.stack || e.reason || 'Unknown promise error'); }
-      });
+      (function () {
+        function show(title, value) {
+          var box = document.getElementById('boot-error');
+          if (!box) return;
+          box.style.display = 'block';
+          box.textContent = title + '\n\n' + String(value || 'Unknown error');
+        }
+        window.addEventListener('error', function (e) {
+          show('VOID HOST failed to start:', e.error?.stack || e.message || 'Unknown browser error');
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          show('VOID HOST startup error:', e.reason?.stack || e.reason || 'Unknown promise error');
+        });
+        var originalError = console.error;
+        console.error = function () {
+          try {
+            var text = Array.prototype.slice.call(arguments).map(function (x) {
+              return x && x.stack ? x.stack : (typeof x === 'string' ? x : JSON.stringify(x));
+            }).join('\n');
+            if (/error|exception|crash|uncaught|react/i.test(text)) show('VOID HOST React/runtime error:', text);
+          } catch (_) {}
+          return originalError.apply(console, arguments);
+        };
+      })();
       (async function roleGuard(){
         try {
           const token=localStorage.getItem('void_token');
@@ -37,6 +53,6 @@
   <body>
     <div id="boot-error"></div>
     <div id="root"></div>
-    <script type="module" src="/main.tsx?v=1.0.3"></script>
+    <script type="module" src="/main.tsx?v=1.0.4"></script>
   </body>
 </html>
