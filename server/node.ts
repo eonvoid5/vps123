@@ -32,9 +32,9 @@ export function nodeStats() {
   let diskTotal = 0;
   let diskFree = 0;
   try {
-    const stat = fs.statfsSync(root);
-    diskTotal = stat.blocks * stat.bsize;
-    diskFree = stat.bavail * stat.bsize;
+    const stat = (fs as any).statfsSync(root);
+    diskTotal = Number(stat.blocks) * Number(stat.bsize);
+    diskFree = Number(stat.bavail) * Number(stat.bsize);
   } catch {}
 
   return {
