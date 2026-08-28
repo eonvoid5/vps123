@@ -80,15 +80,16 @@ app.get("/api/servers", requireAuth, (req, res) => {
 });
 
 app.post("/api/servers", requireAuth, (req, res) => {
-  if (!admin(req, res)) return;
   try {
+    const u = (req as any).user;
     const name = String(req.body.name || "Minecraft Server").trim();
     const version = String(req.body.version || "1.21.8");
     const memory = Math.max(512, Number(req.body.memory || 2048));
     const port = nextFreePort(records().map(s => s.port));
-    const ownerId = String(req.body.ownerId || req.user.id);
+    const requestedOwner = String(req.body.ownerId || "");
+    const ownerId = u.role === "admin" && requestedOwner ? requestedOwner : u.id;
     const d = db();
-    if (!d.users.some(u => u.id === ownerId)) return res.status(404).json({ error: "User not found" });
+    if (!d.users.some(x => x.id === ownerId)) return res.status(404).json({ error: "User not found" });
     const s: ServerRecord = { id: id(), name, software: "Paper", version, port, memory, createdAt: new Date().toISOString(), status: "offline" };
     (s as any).suspended = false;
     (s as any).ownerId = ownerId;
@@ -210,7 +211,7 @@ app.post("/api/servers/:id/backup", requireAuth, async (req, res) => {
 
 app.get("/api/settings", requireAuth, (_q, res) => res.json(db().settings));
 app.put("/api/settings", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); d.settings = { ...d.settings, ...req.body }; saveDB(d); res.json(d.settings); });
-app.get("/api/users", requireAuth, (req, res) => { if (!admin(req, res)) return; res.json(db().users.map(publicUser)); });
+app.get("/api/users", requireAuth, (req, res) => { if (!admin(req, res)) return; const d = db(); const servers = records(); res.json(d.users.map(publicUser).map(u => ({ ...u, servers: servers.filter(s => (s as any).ownerId === u.id).map(s => ({ id:s.id, name:s.name, status:runtime(s.id)?"online":s.status, memory:s.memory, port:s.port, version:s.version })) }))); });
 
 app.use("/api/ptero", requireAuth, pteroRouter);
 
