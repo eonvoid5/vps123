@@ -4,19 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#06130b" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
     <title>VOID HOST</title>
     <style>
-      /* Role-aware navigation: users never get admin deployment/fleet controls. */
       body.role-user .sidebar nav button:nth-child(2),
       body.role-user .sidebar nav button:nth-child(3),
       body.role-user .hero > .primary { display:none !important; }
+      #boot-error { display:none; position:fixed; inset:20px; z-index:99999; padding:22px; border-radius:16px; background:#120b0c; color:#ffd9dc; border:1px solid #ff5964; font:14px/1.5 monospace; white-space:pre-wrap; overflow:auto; }
     </style>
     <script>
+      window.addEventListener('error', function (e) {
+        var box = document.getElementById('boot-error');
+        if (box) { box.style.display = 'block'; box.textContent = 'VOID HOST failed to start:\n\n' + (e.error?.stack || e.message || 'Unknown browser error'); }
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        var box = document.getElementById('boot-error');
+        if (box) { box.style.display = 'block'; box.textContent = 'VOID HOST startup error:\n\n' + (e.reason?.stack || e.reason || 'Unknown promise error'); }
+      });
       (async function roleGuard(){
         try {
           const token=localStorage.getItem('void_token');
           if(token){
-            const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token}});
+            const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
             if(r.ok){const d=await r.json();document.body.classList.add('role-'+d.user.role)}
           }
         }catch(e){}
@@ -25,7 +35,8 @@
     </script>
   </head>
   <body>
+    <div id="boot-error"></div>
     <div id="root"></div>
-    <script type="module" src="/main.tsx"></script>
+    <script type="module" src="/main.tsx?v=1.0.3"></script>
   </body>
 </html>
