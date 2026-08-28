@@ -1,11 +1,11 @@
 {
   "name": "void-host-panel",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server/index.ts",
-    "build": "vite build && esbuild index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
+    "dev": "vite",
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
     "start": "node dist/server.cjs"
   },
   "dependencies": {
@@ -25,7 +25,7 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.4.1",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.24.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.5"
