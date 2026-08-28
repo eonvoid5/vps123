@@ -11,5 +11,11 @@ export default defineConfig({
     port: 6767,
     host: "0.0.0.0",
     allowedHosts: ["panel.voidhost.indevs.in", "localhost", "127.0.0.1"],
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:6768",
+        changeOrigin: true
+      }
+    }
   },
 });
