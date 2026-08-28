@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#06130b" />
     <title>VOID HOST</title>
+    <style>
+      /* Role-aware navigation: users never get admin deployment/fleet controls. */
+      body.role-user .sidebar nav button:nth-child(2),
+      body.role-user .sidebar nav button:nth-child(3),
+      body.role-user .hero > .primary { display:none !important; }
+    </style>
+    <script>
+      (async function roleGuard(){
+        try {
+          const token=localStorage.getItem('void_token');
+          if(token){
+            const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token}});
+            if(r.ok){const d=await r.json();document.body.classList.add('role-'+d.user.role)}
+          }
+        }catch(e){}
+        setTimeout(roleGuard,1500);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
