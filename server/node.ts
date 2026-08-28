@@ -37,15 +37,27 @@ export function nodeStats() {
     diskFree = Number(stat.bavail) * Number(stat.bsize);
   } catch {}
 
+  const used = total - free;
+  const cpuLoad = Number(load[0] || 0);
+
   return {
     hostname: os.hostname(),
     platform: process.platform,
     arch: process.arch,
     kernel: os.release(),
     uptime: os.uptime(),
-    cpu: { cores: cpus.length, load1: load[0], load5: load[1], load15: load[2] },
-    memory: { total, free, used: total - free },
+    // Keep the structured telemetry API while also exposing the flat fields
+    // expected by the current dashboard UI.
+    cpu: cpuLoad,
+    cores: cpus.length,
+    ramTotal: total,
+    ramUsed: used,
+    diskTotal,
+    diskFree,
+    diskUsed: Math.max(0, diskTotal - diskFree),
+    memory: { total, free, used },
     disk: { total: diskTotal, free: diskFree, used: Math.max(0, diskTotal - diskFree) },
+    load: { load1: load[0], load5: load[1], load15: load[2] },
     workdir: path.resolve(root)
   };
 }
