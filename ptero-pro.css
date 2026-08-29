@@ -1,0 +1,21 @@
+/* VOID HOST PRO motion layer */
+:root{--motion-ease:cubic-bezier(.22,1,.36,1)}
+button,.server-card,.table-row,.panel,.card,.server-tabs,.userrow,.files button,.vhx-item,.vhx-tab,.vhx-btn{transition:transform .28s var(--motion-ease),box-shadow .28s var(--motion-ease),border-color .28s ease,background .28s ease,filter .28s ease,opacity .2s ease}
+button:hover,.server-card:hover,.files button:hover{transform:translateY(-2px)}
+button:active{transform:translateY(1px) scale(.975)!important}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(64,255,157,.7);outline-offset:2px}
+.motion{will-change:transform,box-shadow;position:relative;overflow:hidden}
+.motion:after{content:"";position:absolute;inset:-80% -20%;background:linear-gradient(110deg,transparent 42%,rgba(255,255,255,.18) 50%,transparent 58%);transform:translateX(-70%);transition:transform .65s var(--motion-ease);pointer-events:none}
+.motion:hover:after{transform:translateX(70%)}
+.primary.motion:hover{box-shadow:0 16px 45px rgba(19,222,113,.35),0 0 0 1px rgba(100,255,180,.15) inset;filter:brightness(1.1)}
+.server-hero{animation:pro-in .55s var(--motion-ease) both}.pro-card{animation:pro-in .45s var(--motion-ease) both}
+.server-tab-group button,.manager-tab-group button{position:relative}.server-tab-group button:before,.manager-tab-group button:before{content:"";position:absolute;left:12%;right:12%;bottom:3px;height:2px;border-radius:99px;background:var(--accent,#22c55e);transform:scaleX(0);transition:transform .3s var(--motion-ease);transform-origin:center}.server-tab-group button:hover:before,.manager-tab-group button:hover:before,.server-tab-group button.selected:before,.manager-tab-group button.selected:before{transform:scaleX(1)}
+.motion-row:hover{transform:translateX(3px);background:rgba(40,235,135,.055)!important}.motion-row svg{transition:transform .3s var(--motion-ease)}.motion-row:hover svg{transform:rotate(-8deg) scale(1.08)}
+@keyframes pro-in{from{opacity:0;transform:translateY(10px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes pro-pulse{50%{box-shadow:0 0 0 7px rgba(34,245,135,0)}}
+.status-light.online,.online-dot{animation:pro-pulse 1.8s ease-out infinite}
+.motd-preview{min-height:110px;padding:22px;border-radius:15px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:22px;font-weight:800;color:#eafff1;background:radial-gradient(circle at 50% 30%,rgba(45,244,141,.2),transparent 55%),rgba(1,12,6,.62);border:1px solid rgba(100,255,177,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);animation:motd-glow 3s ease-in-out infinite alternate}
+@keyframes motd-glow{to{box-shadow:0 0 35px rgba(30,235,130,.12),inset 0 1px 0 rgba(255,255,255,.08)}}
+.vhx-item:hover{transform:translateY(-2px);border-color:rgba(80,255,160,.3)!important;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+@media(max-width:900px){.two-fields{grid-template-columns:1fr!important}.table-head{display:none!important}.table-row{grid-template-columns:1fr 1fr!important;gap:8px}.server-tabs{overflow-x:auto}.server-tab-group,.manager-tab-group{min-width:max-content}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
