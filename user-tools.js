@@ -4,6 +4,27 @@ function css(){if(document.getElementById('vhu-style'))return;const s=document.c
 body.role-user .vhu-hide{display:none!important}
 `;document.head.appendChild(s)}
 function isUser(){return document.body.classList.contains('role-user')}
+function removeToolsModal(){
+  document.querySelectorAll('#vhu-modal,.vhu-modal,.vhr-modal,#vhu-tools,[data-vhu-tools],[data-vhr-tools]').forEach(el=>el.remove());
+  document.querySelectorAll('button,a').forEach(el=>{
+    const t=(el.textContent||'').replace(/\\s+/g,' ').trim();
+    if(/^⚙️?\s*Server Tools(?:\s*›)?$/i.test(t))el.remove();
+  });
+}
+function keepDirectTabs(){
+  if(!isUser())return;
+  const root=document.querySelector('.server-tabs');
+  if(!root)return;
+  root.querySelectorAll('button,a,[role="tab"]').forEach(el=>{
+    const t=(el.textContent||'').replace(/\\s+/g,' ').trim();
+    if(!t)return;
+    if(/^Activity(?: Log)?$/i.test(t))el.classList.add('vhu-hide');
+    else if(/^(Console|Files|Databases|Schedules|Users|Backups|Network|Startup|Settings|Plugin Manager|Mod Manager|Modpack Manager|Managers|⚡?\s*PRO TOOLS)/i.test(t)){
+      el.classList.remove('vhu-hide','vhr-hidden','vhu-hide');
+      el.style.removeProperty('display');
+    }
+  });
+}
 function hideActivity(){
   if(!isUser())return;
   document.querySelectorAll('button,a,[role="tab"],section,.panel-title').forEach(el=>{
@@ -27,5 +48,5 @@ function hideMemory(){
   });
 }
 css();
-setInterval(()=>{hideActivity();hideMemory()},500);
+setInterval(()=>{removeToolsModal();keepDirectTabs();hideActivity();hideMemory()},400);
 })();
