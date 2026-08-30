@@ -1,12 +1,15 @@
 {
   "name": "void-host-panel",
   "private": true,
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"vite --host 0.0.0.0 --port 6969\" \"tsx server/index.ts\"",
-    "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
-    "start": "PORT=6969 node dist/server.cjs"
+    "dev": "concurrently -k \"vite --host 0.0.0.0 --port 6969\" \"tsx server/index.ts\" \"tsx server/agent.ts\"",
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs && esbuild server/agent.ts --bundle --platform=node --format=cjs --outfile=dist/agent.cjs",
+    "build:panel": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs",
+    "build:agent": "esbuild server/agent.ts --bundle --platform=node --format=cjs --outfile=dist/agent.cjs",
+    "start": "PORT=6969 node dist/server.cjs",
+    "start:agent": "AGENT_PORT=8080 node dist/agent.cjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
