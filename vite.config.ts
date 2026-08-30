@@ -18,7 +18,9 @@ function copyPanelAssets() {
         "user-tools.js",
         "my-servers-stability.js",
         "my-servers-fix.js",
-        "remove-loading.js"
+        "remove-loading.js",
+        "jtg-console.js",
+        "jtg-console.css"
       ];
       for (const file of files) {
         const src = path.resolve(root, file);
