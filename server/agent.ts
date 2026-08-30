@@ -1,8 +1,9 @@
 import express from "express";
 import os from "node:os";
 import fs from "node:fs";
+import { loadDB } from "./db.js";
 import { nodeStats, javaInfo } from "./node.js";
-import { archiveServer, installPaper, killServer, logs, paperVersions, sendCommand, serverDir, startServer, stopServer, runtime, type ServerRecord } from "./manager.js";
+import { archiveServer, installPaper, killServer, logs, paperVersions, sendCommand, startServer, stopServer, runtime, type ServerRecord } from "./manager.js";
 
 const app = express();
 const PORT = Number(process.env.AGENT_PORT || 8080);
@@ -16,54 +17,29 @@ function auth(req: any, res: any, next: any) {
   next();
 }
 
-function serverId(req: any) { return String(req.params.id || ""); }
 function record(id: string): ServerRecord {
-  const file = `${process.env.VOID_DB_PATH || "data/servers.json"}`;
-  try {
-    const db = JSON.parse(fs.readFileSync(file, "utf8"));
-    const s = (db.servers || []).find((x: any) => x.id === id);
-    if (s) return s;
-  } catch {}
-  throw new Error("Server not found");
+  const s = (loadDB() as any).servers?.find((x: any) => x.id === id);
+  if (!s) throw new Error("Server not found");
+  return s;
 }
 
 app.get("/api/agent/health", auth, async (_req, res) => {
-  res.json({
-    ok: true,
-    agent: "VOID HOST AGENT",
-    version: "1.0",
-    hostname: os.hostname(),
-    node: process.version,
-    uptime: os.uptime(),
-    java: await javaInfo(),
-    stats: nodeStats(),
-    capabilities: {
-      power: true,
-      console: true,
-      files: true,
-      backups: true,
-      paperInstaller: true,
-      docker: await dockerAvailable(),
-      sftp: false,
-    },
-  });
+  res.json({ ok: true, agent: "VOID HOST AGENT", version: "1.0", hostname: os.hostname(), node: process.version, uptime: os.uptime(), java: await javaInfo(), stats: nodeStats(), capabilities: { power: true, console: true, files: true, backups: true, paperInstaller: true, docker: await dockerAvailable(), sftp: false } });
 });
 
 app.get("/api/agent/servers/:id/status", auth, (req, res) => {
-  const s = record(serverId(req));
-  const rt = runtime(s.id);
+  const s = record(req.params.id), rt = runtime(s.id);
   res.json({ id: s.id, online: !!rt, status: rt ? "online" : s.status });
 });
 
 app.get("/api/agent/servers/:id/console", auth, (req, res) => {
-  const s = record(serverId(req));
+  const s = record(req.params.id);
   res.json({ logs: logs(s.id), running: !!runtime(s.id) });
 });
 
-app.post("/api/agent/servers/:id/power", auth, async (req, res) => {
+app.post("/api/agent/servers/:id/power", auth, (req, res) => {
   try {
-    const s = record(serverId(req));
-    const action = String(req.body.action || "");
+    const s = record(req.params.id), action = String(req.body.action || "");
     if (action === "start") startServer(s);
     else if (action === "stop") stopServer(s.id);
     else if (action === "kill") killServer(s.id);
@@ -74,19 +50,13 @@ app.post("/api/agent/servers/:id/power", auth, async (req, res) => {
 });
 
 app.post("/api/agent/servers/:id/command", auth, (req, res) => {
-  try {
-    const s = record(serverId(req));
-    sendCommand(s.id, String(req.body.command || ""));
-    res.json({ ok: true });
-  } catch (e) { res.status(400).json({ error: String(e) }); }
+  try { sendCommand(record(req.params.id).id, String(req.body.command || "")); res.json({ ok: true }); }
+  catch (e) { res.status(400).json({ error: String(e) }); }
 });
 
 app.post("/api/agent/servers/:id/install", auth, async (req, res) => {
-  try {
-    const s = record(serverId(req));
-    const version = String(req.body.version || s.version);
-    res.json({ ok: true, ...(await installPaper(s.id, version, s.port)) });
-  } catch (e) { res.status(400).json({ error: String(e) }); }
+  try { const s = record(req.params.id), version = String(req.body.version || s.version); res.json({ ok: true, ...(await installPaper(s.id, version, s.port)) }); }
+  catch (e) { res.status(400).json({ error: String(e) }); }
 });
 
 app.get("/api/agent/paper/versions", auth, async (_req, res) => {
@@ -96,9 +66,8 @@ app.get("/api/agent/paper/versions", auth, async (_req, res) => {
 
 app.post("/api/agent/servers/:id/backup", auth, async (req, res) => {
   try {
-    const s = record(serverId(req));
-    const output = `${process.cwd()}/data/backups/${s.id}-${Date.now()}.tar.gz`;
-    fs.mkdirSync(`${process.cwd()}/data/backups`, { recursive: true });
+    const s = record(req.params.id), dir = `${process.cwd()}/data/backups`, output = `${dir}/${s.id}-${Date.now()}.tar.gz`;
+    fs.mkdirSync(dir, { recursive: true });
     await archiveServer(s.id, output);
     res.status(201).json({ ok: true, name: output.split("/").pop() });
   } catch (e) { res.status(400).json({ error: String(e) }); }
