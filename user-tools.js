@@ -1,19 +1,31 @@
 (()=>{
 'use strict';
-const HIDE=['Databases','Schedules','Users','Backups','Network','Startup','Settings','Activity'];
-let opened=false;
 function css(){if(document.getElementById('vhu-style'))return;const s=document.createElement('style');s.id='vhu-style';s.textContent=`
 body.role-user .vhu-hide{display:none!important}
-.vhu-modal{position:fixed;inset:0;z-index:100005;background:rgba(0,4,2,.72);backdrop-filter:blur(14px);display:grid;place-items:center;padding:18px;animation:vhuFade .18s ease}.vhu-card{width:min(900px,96vw);max-height:88vh;overflow:auto;padding:24px;border:1px solid rgba(73,255,159,.22);border-radius:24px;background:linear-gradient(145deg,rgba(6,28,16,.98),rgba(2,11,6,.98));box-shadow:0 30px 120px rgba(0,0,0,.66),0 0 80px rgba(31,234,126,.08);color:#effff5;animation:vhuUp .22s ease}.vhu-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.vhu-head h2{margin:0}.vhu-head p{margin:5px 0 18px;color:#7f9d8d;font-size:12px}.vhu-close,.vhu-action{border:1px solid rgba(102,255,175,.16);background:rgba(255,255,255,.045);color:#dfffea;border-radius:12px;padding:10px 13px;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s}.vhu-close:hover,.vhu-action:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(25,225,125,.14);background:rgba(35,230,135,.1)}.vhu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.vhu-action{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;font-weight:700}.vhu-action small{display:block;color:#78998a;font-weight:400;margin-top:3px}.vhu-divider{margin:18px 0 14px;border-top:1px solid rgba(255,255,255,.06)}@keyframes vhuFade{from{opacity:0}to{opacity:1}}@keyframes vhuUp{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}@media(max-width:700px){.vhu-grid{grid-template-columns:1fr}}
 `;document.head.appendChild(s)}
-function role(){return document.body.classList.contains('role-user')}
-function serverOpen(){return !!document.querySelector('.server-tabs')}
-function hideTabs(){if(!role())return;const root=document.querySelector('.server-tabs');if(!root)return;root.querySelectorAll('button').forEach(b=>{const t=(b.textContent||'').trim();if(HIDE.some(x=>t===x||t.startsWith(x+' ')))b.classList.add('vhu-hide')});}
-function hideMemory(){if(!role())return;document.querySelectorAll('*').forEach(el=>{const t=(el.textContent||'').trim();if(t==='MEMORY'&&el.children.length<=2){el.parentElement?.classList.add('vhu-hide')}});document.querySelectorAll('.table-head > div,.table-row > div').forEach(el=>{if((el.textContent||'').trim()==='RAM')el.classList.add('vhu-hide')});document.querySelectorAll('.table-row').forEach(row=>{row.querySelectorAll('div').forEach(el=>{if((el.textContent||'').trim().match(/^\d+ MB$/))el.classList.add('vhu-hide')})})}
-function hiddenButton(label){const root=document.querySelector('.server-tabs');if(!root)return null;return [...root.querySelectorAll('button')].find(b=>(b.textContent||'').trim().startsWith(label))||null}
-function openTools(){if(opened)return;opened=true;css();const el=document.createElement('div');el.className='vhu-modal';el.innerHTML=`<div class="vhu-card"><div class="vhu-head"><div><h2>⚙️ Server Tools</h2><p>Manage your server without leaving the console workspace.</p></div><button class="vhu-close">✕</button></div><div class="vhu-grid">${HIDE.filter(x=>x!=='Activity').map(x=>`<button class="vhu-action" data-go="${x}"><span>${x}</span><span>›</span></button>`).join('')}</div><div class="vhu-divider"></div><small style="color:#6f8d7b">Server performance and node memory are hidden from user accounts.</small></div>`;document.body.appendChild(el);const close=()=>{opened=false;el.remove()};el.querySelector('.vhu-close').onclick=close;el.addEventListener('click',e=>{if(e.target===el)return close();const b=e.target.closest?.('[data-go]');if(!b)return;const btn=hiddenButton(b.dataset.go);if(btn){close();btn.click()}})}
-function injectTools(){if(!role()||!serverOpen())return;const root=document.querySelector('.server-tabs');if(!root||root.querySelector('[data-vhu-tools]'))return;const b=document.createElement('button');b.dataset.vhuTools='1';b.className='vhu-action';b.style.cssText='display:inline-flex;width:auto;min-width:150px;justify-content:center;background:linear-gradient(135deg,rgba(41,243,140,.18),rgba(10,167,90,.08));';b.innerHTML='<span>⚙️ Server Tools</span><span>›</span>';b.onclick=openTools;root.appendChild(b)}
-function removeActivity(){if(!role())return;document.querySelectorAll('button,div,section').forEach(el=>{const t=(el.textContent||'').trim();if(t==='Activity'&&el.querySelector?.('svg'))el.classList.add('vhu-hide')})}
-setInterval(()=>{hideTabs();hideMemory();injectTools();removeActivity()},600);
+function isUser(){return document.body.classList.contains('role-user')}
+function hideActivity(){
+  if(!isUser())return;
+  document.querySelectorAll('button,a,[role="tab"],section,.panel-title').forEach(el=>{
+    const t=(el.textContent||'').replace(/\\s+/g,' ').trim();
+    if(/^Activity(?: Log)?$/i.test(t))el.classList.add('vhu-hide');
+  });
+}
+function hideMemory(){
+  if(!isUser())return;
+  document.querySelectorAll('*').forEach(el=>{
+    if(el.children.length>0)return;
+    const t=(el.textContent||'').trim();
+    if(!/^(MEMORY|RAM)$/i.test(t))return;
+    el.closest('.card,.table-row,.panel,.mini-card,.stat-card')?.classList.add('vhu-hide');
+  });
+  document.querySelectorAll('.table-head,.table-row').forEach(row=>{
+    [...row.children].forEach((c,i)=>{
+      const head=document.querySelector('.table-head')?.children[i]?.textContent?.trim()||'';
+      if(/^(RAM|MEMORY)$/i.test(head)||/^\\d+\\s*MB$/i.test(c.textContent.trim()))c.classList.add('vhu-hide');
+    });
+  });
+}
 css();
+setInterval(()=>{hideActivity();hideMemory()},500);
 })();
