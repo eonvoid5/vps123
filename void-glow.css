@@ -1,0 +1,172 @@
+/* VOID HOST — cinematic glow + motion layer
+   Visual-only enhancement: keeps existing controls and APIs unchanged. */
+:root{
+  --void-green:#28f58d;
+  --void-green-soft:rgba(40,245,141,.22);
+  --void-cyan:#45d8ff;
+  --void-purple:#b47cff;
+  --void-red:#ff6570;
+  --void-glow:0 0 0 1px rgba(55,250,145,.10),0 0 24px rgba(35,239,133,.10),inset 0 1px 0 rgba(255,255,255,.045);
+}
+
+/* Buttons: glow, lift, press, focus ring */
+button{
+  position:relative;
+  isolation:isolate;
+  transition:transform .20s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,filter .22s ease,border-color .22s ease,background .28s ease!important;
+}
+button::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:-1;
+  border-radius:inherit;
+  opacity:0;
+  box-shadow:0 0 26px rgba(40,245,141,.30),inset 0 0 18px rgba(40,245,141,.08);
+  transition:opacity .22s ease;
+  pointer-events:none;
+}
+button:hover{
+  transform:translateY(-2px)!important;
+  filter:brightness(1.07)!important;
+  box-shadow:0 12px 30px rgba(20,235,120,.14),0 0 18px rgba(40,245,141,.13),inset 0 1px 0 rgba(255,255,255,.07)!important;
+}
+button:hover::before{opacity:1}
+button:active{
+  transform:translateY(1px) scale(.965)!important;
+  filter:brightness(1.14)!important;
+  box-shadow:0 2px 10px rgba(20,235,120,.20),0 0 20px rgba(40,245,141,.20),inset 0 0 16px rgba(40,245,141,.10)!important;
+}
+button:focus-visible{
+  outline:0!important;
+  box-shadow:0 0 0 2px rgba(40,245,141,.18),0 0 0 5px rgba(40,245,141,.06),0 0 28px rgba(40,245,141,.18)!important;
+}
+button.primary{
+  box-shadow:0 9px 28px rgba(24,239,125,.18),0 0 20px rgba(40,245,141,.12),inset 0 1px 0 rgba(255,255,255,.10)!important;
+}
+button.primary:hover{box-shadow:0 14px 38px rgba(24,239,125,.24),0 0 30px rgba(40,245,141,.18),inset 0 1px 0 rgba(255,255,255,.12)!important}
+button.danger:hover{box-shadow:0 12px 34px rgba(255,50,65,.22),0 0 25px rgba(255,70,80,.16)!important}
+
+/* Give major UI surfaces luminous edges without changing layout. */
+.glass,.panel,.server-hero,.server-tabs,.console,.card,.table-panel,.form,.files-panel,.manager-panel{
+  border-color:rgba(63,250,150,.16)!important;
+  box-shadow:var(--void-glow)!important;
+}
+.glass:hover,.panel:hover,.card:hover,.server-hero:hover,.server-tabs:hover{
+  box-shadow:0 0 0 1px rgba(55,250,145,.13),0 0 30px rgba(35,239,133,.08),inset 0 1px 0 rgba(255,255,255,.055)!important;
+}
+
+/* Inputs/selects glow on focus. */
+input,select,textarea{
+  transition:border-color .22s ease,box-shadow .28s ease,transform .20s ease,background .22s ease!important;
+}
+input:hover,select:hover,textarea:hover{border-color:rgba(70,250,155,.28)!important}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(70,250,155,.62)!important;
+  box-shadow:0 0 0 3px rgba(40,245,141,.07),0 0 26px rgba(40,245,141,.12),inset 0 0 18px rgba(40,245,141,.035)!important;
+  transform:translateY(-1px)!important;
+  outline:none!important;
+}
+
+/* Sidebar/topbar nav gets the same motion language. */
+.sidebar nav button,.topbar button,.server-tab-group button,.manager-tab-group button,.actions button{
+  border-color:rgba(70,250,155,.10)!important;
+}
+.sidebar nav button:hover,.topbar button:hover,.server-tab-group button:hover,.manager-tab-group button:hover,.actions button:hover{
+  border-color:rgba(70,250,155,.30)!important;
+}
+
+/* Animated luminous strokes on selected/active controls. */
+.sidebar nav button.active,.server-tab-group button.selected,.manager-tab-group button.selected,.server-tabs button.manager{
+  border-color:rgba(76,255,160,.45)!important;
+  box-shadow:0 0 0 1px rgba(75,255,160,.06),0 0 24px rgba(40,245,141,.16),inset 0 0 18px rgba(40,245,141,.055)!important;
+  animation:voidSelectedPulse 2.4s ease-in-out infinite;
+}
+@keyframes voidSelectedPulse{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(1.07)}
+}
+
+/* CONSOLE: closer to the supplied dream/JTG composition. */
+.console{
+  overflow:hidden!important;
+  position:relative!important;
+  background:linear-gradient(180deg,rgba(4,11,7,.88),rgba(2,7,5,.93))!important;
+  border:1px solid rgba(62,255,151,.22)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.27),0 0 35px rgba(34,240,130,.08),inset 0 1px 0 rgba(255,255,255,.055)!important;
+  animation:voidConsoleIn .48s cubic-bezier(.16,1,.3,1) both;
+}
+.console::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(105deg,transparent 18%,rgba(74,255,161,.045) 48%,transparent 72%);
+  transform:translateX(-120%);
+  animation:voidConsoleSweep 5.5s ease-in-out infinite;
+}
+.console .console-head{
+  position:relative!important;
+  background:linear-gradient(180deg,rgba(11,25,17,.96),rgba(5,13,9,.91))!important;
+  border-bottom:1px solid rgba(78,255,160,.10)!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.16)!important;
+}
+.console .console-head b{letter-spacing:.10em!important;text-shadow:0 0 16px rgba(55,250,145,.16)}
+.console .console-head small{letter-spacing:.16em!important}
+.console .console-head b::after{
+  content:"";
+  display:inline-block;
+  width:7px;height:7px;margin-left:8px;border-radius:50%;
+  background:#36f28f;
+  box-shadow:0 0 10px #36f28f,0 0 22px rgba(54,242,143,.55);
+  vertical-align:1px;
+  animation:voidLiveDot 1.7s ease-in-out infinite;
+}
+.console .logs{
+  background:radial-gradient(circle at 50% 0%,rgba(35,100,61,.08),transparent 34%),#060a08!important;
+  scrollbar-color:rgba(64,244,151,.34) transparent;
+}
+.console .logs>div{
+  text-shadow:0 0 7px rgba(196,255,220,.035);
+  animation:voidConsoleLine .20s ease both;
+}
+.console .command{
+  background:linear-gradient(180deg,rgba(13,20,16,.96),rgba(7,13,10,.98))!important;
+  box-shadow:0 -9px 25px rgba(0,0,0,.18)!important;
+}
+.console .command input{caret-color:#43f59a!important}
+.console .command>span{filter:drop-shadow(0 0 8px rgba(70,250,155,.35))}
+
+@keyframes voidConsoleIn{from{opacity:0;transform:translateY(12px) scale(.992);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes voidConsoleSweep{0%,42%{transform:translateX(-120%);opacity:0}52%{opacity:1}72%,100%{transform:translateX(120%);opacity:0}}
+@keyframes voidConsoleLine{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+@keyframes voidLiveDot{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.35);opacity:1}}
+
+/* Cards and stat gauges get subtle alive motion. */
+.card-icon,.server-logo,.manager-icon,.danger-icon{
+  animation:voidIconFloat 3.8s ease-in-out infinite;
+}
+@keyframes voidIconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* Server action buttons get differentiated glow colors while preserving theme. */
+.actions button:first-child{box-shadow:0 0 24px rgba(45,180,255,.10)!important}
+.actions button:nth-child(2){box-shadow:0 0 24px rgba(40,245,141,.14)!important}
+.actions button:nth-child(3){box-shadow:0 0 24px rgba(255,190,70,.08)!important}
+
+/* Gentle moving highlight for rows. */
+.table-row,.active-list button,.files button,.userrow{
+  transition:transform .20s cubic-bezier(.2,.8,.2,1),border-color .22s ease,box-shadow .24s ease,background .24s ease!important;
+}
+.table-row:hover,.active-list button:hover,.files button:hover,.userrow:hover{
+  transform:translateX(3px)!important;
+  border-color:rgba(62,255,151,.24)!important;
+  box-shadow:0 0 24px rgba(40,245,141,.07)!important;
+}
+
+/* Preserve accessibility. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}
+@media(max-width:700px){
+  .console .logs{min-height:300px!important}
+}
