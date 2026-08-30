@@ -21,7 +21,9 @@ function copyPanelAssets() {
         "remove-loading.js",
         "jtg-console.js",
         "jtg-console.css",
-        "dream-console.js"
+        "dream-console.js",
+        "dream-console.css",
+        "void-glow.css"
       ];
       for (const file of files) {
         const src = path.resolve(root, file);
