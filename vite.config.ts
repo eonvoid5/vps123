@@ -23,7 +23,9 @@ function copyPanelAssets() {
         "jtg-console.css",
         "dream-console.js",
         "dream-console.css",
-        "void-glow.css"
+        "void-glow.css",
+        "dream-server-workspace.js",
+        "dream-server-workspace.css"
       ];
       for (const file of files) {
         const src = path.resolve(root, file);
