@@ -1,6 +1,21 @@
 (()=>{
 'use strict';
+function injectAsset(kind, href){
+  if(kind==='css'){
+    if([...document.querySelectorAll('link[rel="stylesheet"]')].some(x=>x.getAttribute('href')===href)) return;
+    const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l);
+  }else{
+    if(document.querySelector(`script[data-void-asset="${href}"]`)) return;
+    const s=document.createElement('script');s.src=href;s.defer=true;s.dataset.voidAsset=href;document.head.appendChild(s);
+  }
+}
+function bootAssets(){
+  injectAsset('css','/void-glow.css');
+  injectAsset('css','/dream-console.css');
+  injectAsset('script','/dream-console.js');
+}
 function enhance(){
+  bootAssets();
   document.querySelectorAll('.console').forEach((el)=>{
     if(el.dataset.jtgEnhanced==='1') return;
     el.dataset.jtgEnhanced='1';
