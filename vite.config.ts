@@ -9,7 +9,7 @@ function copyPanelAssets() {
     closeBundle() {
       const root = process.cwd();
       const out = path.resolve(root, "dist");
-      for (const file of ["void-enhancements.js", "void-hotfix.js", "ptero-tools.js"]) {
+      for (const file of ["void-enhancements.js", "void-hotfix.js", "ptero-tools.js", "node-tools.js", "ui-role-layout.js", "user-tools.js"]) {
         const src = path.resolve(root, file);
         if (fs.existsSync(src)) fs.copyFileSync(src, path.join(out, file));
       }
