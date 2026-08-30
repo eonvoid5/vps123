@@ -1,0 +1,23 @@
+/* JTG-inspired console structure; keeps VOID HOST glass/green identity. */
+.server-tabs + .jtg-console-shell{margin-top:18px}
+.console.jtg-console{padding:0!important;overflow:hidden;border-radius:14px;background:rgba(3,8,5,.72)!important;border:1px solid rgba(55,250,145,.16);box-shadow:0 22px 70px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.045);animation:jtgRise .45s cubic-bezier(.16,1,.3,1)}
+.jtg-console .console-head{display:flex!important;align-items:center;justify-content:space-between;min-height:58px;padding:13px 18px!important;background:linear-gradient(180deg,rgba(11,24,17,.94),rgba(6,14,10,.9));border-bottom:1px solid rgba(255,255,255,.055)!important}
+.jtg-console .console-head b{display:block;color:#e8fff2;font-size:14px;letter-spacing:.06em;font-weight:800}
+.jtg-console .console-head small{display:block;margin-top:3px;color:#4cf09b;font-size:9px;letter-spacing:.14em}
+.jtg-console .console-head button{width:34px;height:34px;border-radius:9px;display:grid!important;place-items:center;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);color:#9cc3ad;transition:.2s ease}
+.jtg-console .console-head button:hover{color:#58f0a1;border-color:rgba(58,240,145,.38);transform:translateY(-2px);box-shadow:0 8px 22px rgba(24,239,125,.1)}
+.jtg-console .logs{height:520px!important;min-height:320px!important;padding:18px 20px!important;background:#080b09!important;color:#c7d8ce!important;font:12.5px/1.62 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace!important;overflow:auto!important;scrollbar-width:thin}
+.jtg-console .logs>div{margin:0 0 1px;white-space:pre-wrap;word-break:break-word;animation:jtgLine .22s ease both}
+.jtg-console .logs .jtg-warn{color:#e8bd15!important}.jtg-console .logs .jtg-error{color:#ff6b73!important}.jtg-console .logs .jtg-system{color:#5aee9b!important}.jtg-console .logs .jtg-command{color:#969f9b!important}
+.jtg-console .command{display:flex!important;align-items:center;gap:11px!important;min-height:56px;padding:11px 16px!important;background:#111613!important;border-top:1px solid rgba(255,255,255,.06)!important}
+.jtg-console .command>span{color:#63f6a6!important;font:bold 18px ui-monospace,monospace}
+.jtg-console .command input{height:36px!important;padding:0!important;background:transparent!important;color:#ecfff4!important;font:12.5px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace!important}
+.jtg-console .command input::placeholder{color:#53695d!important}
+.jtg-console .command button{height:36px!important;padding:0 15px!important;border-radius:8px!important;background:linear-gradient(135deg,#22e882,#10b969)!important;color:#03120a!important;font-weight:800!important;border:0!important;transition:.2s ease!important}
+.jtg-console .command button:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(24,239,125,.2)}
+.jtg-console .command button:active{transform:translateY(1px) scale(.98)}
+@keyframes jtgLine{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+@keyframes jtgRise{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+@media(max-width:900px){.jtg-console .logs{height:430px!important}}
+@media(max-width:600px){.jtg-console .logs{height:360px!important;padding:14px!important;font-size:11.5px!important}.jtg-console .command{padding:9px 12px!important}.jtg-console .command button{padding:0 11px!important}}
+@media(prefers-reduced-motion:reduce){.jtg-console,.jtg-console .logs>div{animation:none!important}.jtg-console .command button,.jtg-console .console-head button{transition:none!important}}
