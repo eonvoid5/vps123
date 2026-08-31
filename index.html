@@ -7,35 +7,11 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <title>VOID HOST</title>
-    <link rel="stylesheet" href="/ui-polish.css" />
-    <link rel="stylesheet" href="/void-hotfix.css" />
-    <link rel="stylesheet" href="/panel-glow.css" />
-    <link rel="stylesheet" href="/ptero-pro.css" />
-    <link rel="stylesheet" href="/jtg-console.css" />
-    <link rel="stylesheet" href="/dream-server-workspace.css" />
-    <style>
-      body.role-user .sidebar nav button:nth-child(2),body.role-user .sidebar nav button:nth-child(3),body.role-user .hero > .primary{display:flex!important}
-      #boot-error{display:none;position:fixed;inset:20px;z-index:99999;padding:22px;border-radius:16px;background:#120b0c;color:#ffd9dc;border:1px solid #ff5964;font:14px/1.5 monospace;white-space:pre-wrap;overflow:auto}
-    </style>
-    <script>
-      (function(){function show(t,v){var b=document.getElementById('boot-error');if(!b)return;b.style.display='block';b.textContent=t+'\n\n'+String(v||'Unknown error')}window.addEventListener('error',function(e){show('VOID HOST failed to start:',e.error?.stack||e.message||'Unknown error')});window.addEventListener('unhandledrejection',function(e){show('VOID HOST startup error:',e.reason?.stack||e.reason||'Unknown promise error')});var oe=console.error;console.error=function(){try{var x=Array.prototype.slice.call(arguments).map(function(v){return v&&v.stack?v.stack:typeof v==='string'?v:JSON.stringify(v)}).join('\n');if(/error|exception|crash|uncaught|react/i.test(x))show('VOID HOST React/runtime error:',x)}catch(_){}return oe.apply(console,arguments)}})();
-      (async function roleGuard(){try{const token=localStorage.getItem('void_token');if(token){const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});if(r.ok){const d=await r.json();document.body.classList.add('role-'+d.user.role)}}}catch(e){}setTimeout(roleGuard,1500)})();
-    </script>
-    <script src="/void-enhancements.js" defer></script>
-    <script src="/void-hotfix.js" defer></script>
-    <script src="/ptero-tools.js" defer></script>
-    <script src="/node-tools.js" defer></script>
-    <script src="/ui-role-layout.js" defer></script>
-    <script src="/user-tools.js" defer></script>
-    <script src="/my-servers-stability.js" defer></script>
-    <script src="/my-servers-fix.js" defer></script>
-    <script src="/remove-loading.js" defer></script>
-    <script src="/jtg-console.js" defer></script>
-    <script src="/dream-server-workspace.js" defer></script>
-    <script src="/create-install-retry.js" defer></script>
-    <script src="/normal-user-enhancements.js" defer></script>
-    <script src="/normal-user-console.js" defer></script>
-    <script src="/normal-user-cleanup.js" defer></script>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/hyper-core.css" />
   </head>
-  <body><div id="boot-error"></div><div id="root"></div><script type="module" src="/main.tsx"></script></body>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
 </html>
